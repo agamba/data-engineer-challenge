@@ -237,6 +237,13 @@ def insert_data_to_db(batches, table_name):
     # close db session and engine
     session.close()
     # engine.dispose() # consider keeping connection open?
+
+    # automate saving logs to json file for each request
+    
+    print("result_log: ", logs)
+    log_path = dump_json_to_file(logs, table_name)
+    print(f"Logs saved successfuly at path: {log_path}")
+    
     return logs
 
 def process_valid_invalid_results(file_name, chunk_size, table_name):
