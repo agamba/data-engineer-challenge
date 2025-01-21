@@ -44,6 +44,9 @@
 
 # Development plan - Todo App Code
 
+\
+[X] Set up github repo
+\
 [ ] Load data from csv files
 \
 [ ] test DB connection (try local mysql to start)
@@ -65,9 +68,9 @@
 - Implement configuration for db type (e.g. mysql, postgress, other)? out of scope for now
 
 # Validation cases:
+
 - number of columns
 - null and empty values
 - is a valid ISO date
 - department_id exists in departments table
 - job_id exists in jobs table
-
