@@ -219,8 +219,15 @@ def insert_data_to_db(batches, table_name):
         
         # save all invalid data into json log file
         # Replace NaN values with empty strings in invalid df
-        copy_invallid = batch[1].copy()
-        copy_invallid.fillna(0, inplace=True)
+        invallid_df = batch[1].copy()
+        # add spacial case for "datetime" columns
+
+        if(table_name == "hired_employees"):
+            # drop datetime column
+            invallid_df = invallid_df.drop('datetime', axis=1)  # axis=1 specifies column
+            invallid_df = invallid_df.rename(columns={'datetime_str': 'datetime'}) 
+
+        invallid_df.fillna(0, inplace=True)
         # TODO: improved data cleaning based of further requirements for loging errors
         error_log = {
             "file_name": file_name,
@@ -228,7 +235,7 @@ def insert_data_to_db(batches, table_name):
             "batch_number": i+1,
             "total_valid_records": len(batch[0]),
             "total_invalid_records": len(batch[1]),
-            "invalid_data": copy_invallid.to_dict(orient="records")
+            "invalid_data": invallid_df.to_dict(orient="records")
         }
         logs.append(error_log)
 
@@ -243,7 +250,7 @@ def insert_data_to_db(batches, table_name):
     print("result_log: ", logs)
     log_path = dump_json_to_file(logs, table_name)
     print(f"Logs saved successfuly at path: {log_path}")
-    
+
     return logs
 
 def process_valid_invalid_results(file_name, chunk_size, table_name):
@@ -310,8 +317,6 @@ def dump_json_to_file(data, table_name):
     return False
 
 
-# result_logs = process_valid_invalid_results(file_name, chunk_size, table_name)
-# print("result_log: ", result_logs)
-# log_path = dump_json_to_file(result_logs, table_name)
-# print(f"Logs saved successfuly at path: {log_path}")
+result_logs = process_valid_invalid_results(file_name, chunk_size, table_name)
+
 
