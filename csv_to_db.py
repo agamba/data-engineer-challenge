@@ -11,6 +11,8 @@ import numpy as np
 from models import engine, Session, Department, Job, HiredEmployee, DepartmentFailed, JobFailed, HiredEmployeeFailed
 
 # import utility functions
+# TODO: need to move some vars to Flask app
+from util import file_name, chunk_size, table_name, columns_names_by_table
 
 """Define csv to db functions"""
 #################################
@@ -19,7 +21,7 @@ def load_csv_data(file_name, chunk_size, table_name):
     columns_names = columns_names_by_table[table_name]
     # optional, Specify columns data types: e.g. dtype={'id': 'int64', }
     df_chunks = pd.read_csv(file_name, chunksize=chunk_size, names=columns_names)
-    print("Padas parsers object: ", df_chunks)
+    # print("Padas parsers object: ", df_chunks)
     return df_chunks
 
 def separate_valid_invalid_data(df_chunks, table_name):
@@ -38,37 +40,25 @@ def separate_valid_invalid_data(df_chunks, table_name):
     
     try:
         for df in df_chunks:
-            # 1. TODO: validate data in each chunk
-            # consider separating valid and invalid data in df and process them separately
-            # validate_data(df, table_name)
 
             # before start make a full copy of the df. to be used for logging purposes
-            df_copy = df.copy()
+            # df_copy = df.copy()
             
             """Define validation rules for each table"""
-
             if(table_name=="hired_employees"):
-                valid_data, invalid_data = validate_hired_employees(df)
-                # print("valid_data", valid_data)
-                # print("invalid_data", invalid_data)
-                print("LEN valid_data", len(valid_data))
-                print("LEN invalid_data", len(invalid_data))
-                
+                valid_data, invalid_data = validate_hired_employees(df)               
             elif(table_name=="departments"):
                 valid_data, invalid_data = validate_departments(df)
-                
             elif(table_name=="jobs"):
                 valid_data, invalid_data = validate_jobs(df)
-                
             else:
                 print("table name not found")
 
             # collect all valid and invalid data in each chunk
+            # TODO: consider collecting also original df to report exact values in logging
             results.append([valid_data, invalid_data])
-
-            
-        # TODO: consider creating a dictionary to store valid and invalid stats ?
-        return valid_data, invalid_data
+        
+        return results
     
     except Exception as e:
             error_message = f"\nValidating batch. error: {e}"
@@ -103,6 +93,11 @@ def validate_hired_employees(df):
     return results
 
 def validate_departments(df):
+    """
+    Validate the departments data.
+    :param df: DataFrame containing the departments data.
+    :return: DataFrame containing the valid and invalid data.
+    """
     print("\t validate_departments()")
     
     # convert id to integers in imported data
@@ -117,8 +112,12 @@ def validate_departments(df):
     results = (df, invalid_data)
     return results
 
-
 def validate_jobs(df):
+    """
+    Validate the jobs data.
+    :param df: DataFrame containing the jobs data.
+    :return: DataFrame containing the valid and invalid data.
+    """
     print("\t validate_jobs()")
     
     # convert id to integers in imported data
@@ -133,49 +132,61 @@ def validate_jobs(df):
     results = (df, invalid_data)
     return results
 
-#################################
-# load db session
-session = Session()
+def insert_data_to_db(batches, table_name):
+    print("\t insert_data_to_db()")
+    # load db session
+    session = Session()
+    print("batches type: ", type(batches))
+    print("batches len: ", len(batches))
 
-# Define the column names for each table
-# assuming that csv does not have header
-columns_names_by_table = {
-    "departments": ['id', 'department'],
-    "jobs": ['id', 'job'],
-    "hired_employees": ['id', 'name', 'datetime', 'department_id', 'job_id']
-}
+    # loop over array of results (valild[0], invalid[1])
+    # loop over batches
+    for batch in batches:
+        print(type(batch))
+        # print(batch)
+        print("VALID DATA")
+        print(batch[0])
 
-# Define api variables
-################################
-# table_name = "hired_employees"
-# file_name = './data/hired_employees.csv'
-# file_name = './data/hired_employees_error.csv'
+        print("INVALID DATA")
+        print(batch[1])
 
-# table_name = "departments"
-# file_name = './data/departments.csv'
-# file_name = './data/departments_error.csv'
+    results = ""
+    
+    return results
+    # close db session and engine
+    session.close()
+    # engine.dispose() # consider keeping connection open?
 
-table_name = "jobs"
-# file_name = './data/jobs.csv'
-file_name = './data/jobs_error.csv'
+def process_valid_invalid_results(file_name, chunk_size, table_name):
+    """
+    """
+    print("###################################")
+    print("Chunk size: ", chunk_size)
+    print("Table name: ", table_name)
+    print("File name: ", file_name)
+    
+    # 1. get data batches
+    df_batches = load_csv_data(file_name, chunk_size, table_name)
+    print("###################################")
+    print("Pandas parser object: ", df_batches)
+    
+    # 2. separate valid and invalid data for each batch
+    valid_invalid_array = separate_valid_invalid_data(df_batches, table_name)
 
-chunk_size = 1000
+    print("###################################")
+    print("CHECK CONSISTENCY OF DATA")
+    # print(valid_invalid_array)
+    print("type valid_invalid_array: ", type(valid_invalid_array))
+    num_of_batches = len(valid_invalid_array)
+    print("Number of batchs: ", num_of_batches)
+    
+    if(num_of_batches == 0):
+        print("No data to process")
+        return False
 
-################################
-# 1. get data batches
-df_batches = load_csv_data(file_name, chunk_size, table_name)
+    # 3. insert valid and invalid data into db
+    results_db = insert_data_to_db(valid_invalid_array, table_name)
 
-# 2. separate valid and invalid data for each batch
-result = separate_valid_invalid_data(df_batches, table_name)
-print("\t RESULTS: separate_valid_invalid_data")
-print("VALID DATA")
-print(result[0])
+    return True
 
-print("INVALID DATA")
-print(result[1])
-
-
-# validate_and_process_data_batches(session, batches, table_name=table_name, file_name=file_name)
-
-session.close()
-engine.dispose()
+result = process_valid_invalid_results(file_name, chunk_size, table_name)
