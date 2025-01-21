@@ -53,7 +53,11 @@
 \
 [X] Create data models, using sqlalchemy
 \
-[ ] Evaluate and implement data validation needs, e.g. missing values, date format, invalid ids for Department and Jobs?
+[X] Validate data using pandas: missing and incorrect values, date format
+\
+[ ] Create draft API with Flask
+\
+[ ] Evaluate invalid ids for Department and Jobs?
 \
 [ ] Verify mysql tables are dynamically created from models
 \
