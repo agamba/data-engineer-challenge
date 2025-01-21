@@ -1,0 +1,10 @@
+pyspark
+fastavro
+pandas
+pytest
+Flask
+SQLAlchemy
+pymysql
+
+
+
