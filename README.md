@@ -47,19 +47,19 @@
 \
 [X] Set up github repo
 \
-[ ] Load data from csv files
+[X] Load data from csv files in batches
 \
-[ ] test DB connection (try local mysql to start)
+[X] test DB connection (try local mysql to start)
 \
-[ ] Create data models, using sqlalchemy
+[X] Create data models, using sqlalchemy
+\
+[ ] Evaluate and implement data validation needs, e.g. missing values, date format, invalid ids for Department and Jobs?
 \
 [ ] Verify mysql tables are dynamically created from models
 \
 [ ] Isolate db credentials (.env or other method? clound based?)
 \
 [ ] Evaluate best practice for logging failed transactions
-\
-[ ] Evaluate data validation needs, e.g. missing values, date format, invalid ids for Department and Jobes
 
 # Considerations
 
