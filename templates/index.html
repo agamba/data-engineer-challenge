@@ -23,7 +23,17 @@
     <h2>cURL Examples:</h2>
 
     <p><strong>Departments:</strong></p>
-    <pre><code>curl -X POST -F "file=@departments.csv" http://127.0.0.1:5000/departments</code></pre>
+    <pre><code>
+        curl -X POST \
+        -H "Content-Type: application/json" \
+        -d '{
+          "file_name": "./data/departments_error.csv",
+          "chunk_size": 1000,
+          "table_name": "departments"
+        }' \
+        http://localhost:8080/departments
+
+    </code></pre>
 
     <p><strong>Jobs:</strong></p>
     <pre><code>curl -X POST -F "file=@jobs.csv" http://127.0.0.1:5000/jobs</code></pre>
