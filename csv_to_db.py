@@ -6,6 +6,7 @@ import datetime
 import traceback
 import pandas as pd
 import numpy as np
+import json
 
 # import db models
 from models import engine, Session, Department, Job, HiredEmployee
@@ -144,26 +145,20 @@ def create_data_object(table_name, row, is_valid_data):
         object: The data object using SQLAlchemy models.
     """
     try:
-
         if(table_name == "departments"):
             obj = {
                 "id": row["id"],
                 "department": row["department"],
             }
-            if(is_valid_data):
-                return Department(**obj)
-            else:
-                return DepartmentFailed(**obj)
+            return Department(**obj)
 
         elif(table_name == "jobs"):
             obj = {
                 "id": row["id"],
                 "job": row["job"],
             }
-            if(is_valid_data):
-                return Job(**obj)
-            else:
-                return JobFailed(**obj)
+            return Job(**obj)
+            
         elif(table_name == "hired_employees"):
             
             datetime_str = ""
@@ -177,26 +172,27 @@ def create_data_object(table_name, row, is_valid_data):
                     "datetime_str": datetime_str,
                     "department_id": row["department_id"],
                     "job_id": row["job_id"],
-            }
-            if(is_valid_data):
-                return HiredEmployee(**obj)
-            else:
-                # remove datetime_str because it's not logged into HiredEmployeeFailed
-                del obj["datetime_str"]
-                return HiredEmployeeFailed(**obj)
+            }            
+            return HiredEmployee(**obj)
+
         else:
             print(f"Table name {table_name} not recognized")
             return None
-
     
     except Exception as e:
         error_message = f"\nError creating data object for table: {table_name}. error: {e}"
         error_message += f"\nTraceback:\n{traceback.format_exc()}"  # Add traceback information
         print(error_message)
         return None
-    
+
 def insert_data_to_db(batches, table_name):
     """
+    Inserts data into the database.
+    Args:
+        batches (list): A list of batches, where each batch is a tuple containing valid and invalid data.
+        table_name (str): The name of the table to insert data into.
+    Returns:
+        error_log (json)
     """
     print("\t insert_data_to_db()")
     # load db session
@@ -225,6 +221,7 @@ def insert_data_to_db(batches, table_name):
         # Replace NaN values with empty strings in invalid df
         copy_invallid = batch[1].copy()
         copy_invallid.fillna(0, inplace=True)
+        # TODO: improved data cleaning based of further requirements for loging errors
         error_log = {
             "file_name": file_name,
             "table_name": table_name,
@@ -233,20 +230,16 @@ def insert_data_to_db(batches, table_name):
             "total_invalid_records": len(batch[1]),
             "invalid_data": copy_invallid.to_dict(orient="records")
         }
+        # TODO: save error log to json file
+        # print(error_log)
 
-        print(error_log)
-
-
-    
     session.commit()
-        
 
-    results = ""
-    
-    return results
     # close db session and engine
     session.close()
     # engine.dispose() # consider keeping connection open?
+
+    return error_log
 
 def process_valid_invalid_results(file_name, chunk_size, table_name):
     """
@@ -280,4 +273,4 @@ def process_valid_invalid_results(file_name, chunk_size, table_name):
 
     return True
 
-result = process_valid_invalid_results(file_name, chunk_size, table_name)
+result_log = process_valid_invalid_results(file_name, chunk_size, table_name)
