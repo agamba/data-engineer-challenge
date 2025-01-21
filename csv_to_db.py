@@ -317,6 +317,6 @@ def dump_json_to_file(data, table_name):
     return False
 
 
-result_logs = process_valid_invalid_results(file_name, chunk_size, table_name)
+# result_logs = process_valid_invalid_results(file_name, chunk_size, table_name)
 
 
