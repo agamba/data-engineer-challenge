@@ -257,7 +257,7 @@ def insert_data_to_db(batches, table_name):
 
     except exc.IntegrityError as e:
         session.rollback()
-        error_message = f"IntegrityError processing batch. All data rejected."
+        error_message = f"IntegrityError processing batch. Data in batch rejected."
         # error_message = f"\nIntegrityError processing batch. Table: {table_name}. Error: {e}"
         # error_message += f"\nTraceback:\n{traceback.format_exc()}"
         error_log = {
