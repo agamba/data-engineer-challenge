@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text, text
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text, text, exc
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 # Load environment variables from .env file
