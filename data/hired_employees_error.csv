@@ -1,0 +1,17 @@
+101,Antonio OK 1,2021-09-01T23:27:38Z,41,51
+1,,2021-11-07T02:48:42Z,2,96
+2,Ty Hofer,2021-05-30T05:43:46Z,8,
+3,Lyman Hadye,2021-09-01T23:27:38Z,,52
+,Antonio Gamba,2021-09-01T23:27:38Z,1,1
+,Antonio Bari,2021-09-01T23:27:38Z,1,text
+,Antonio no date,dsfsdfdsf,1,text
+106,Antonio OK 2,2021-09-01T23:27:38Z,41,51
+,Antonio date as text,some date,1,text
+,Antonio no data
+,Antonio last,some date,1,1
+,Antonio no Numeric,some date,1,some value
+105,Antonio OK 3 not valid,2025-01-20 15:40:38.811182+00:00,1,1
+100,Antonio OK 4,2021-09-01T23:27:38Z,1,1
+
+
+
