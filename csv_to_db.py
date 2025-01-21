@@ -8,8 +8,9 @@ import pandas as pd
 import numpy as np
 import json
 
+
 # import db models
-from models import engine, Session, Department, Job, HiredEmployee
+from models import engine, Session, Department, Job, HiredEmployee, exc
 
 # import utility functions
 # TODO: need to move some vars to Flask app
@@ -194,62 +195,84 @@ def insert_data_to_db(batches, table_name):
     Returns:
         error_log (json)
     """
-    print("\t insert_data_to_db()")
-    # load db session
-    session = Session()
-    print("batches type: ", type(batches))
-    print("batches len: ", len(batches))
-    print("==========")
-    logs = []
-    # loop over array of results (valild[0], invalid[1])
-    # loop over batches
-    for i, batch in enumerate(batches):
+    try:
+        print("\t insert_data_to_db()")
+        # load db session
+        session = Session()
+        print("batches type: ", type(batches))
+        print("batches len: ", len(batches))
         print("==========")
-        print("batch: ", i+1)
-        print("VALID DATA")
-        print(batch[0])
-        print("INVALID DATA")
-        print(batch[1])
-        print("==========")
+        logs = []
+        # loop over array of results (valild[0], invalid[1])
+        # loop over batches
+        for i, batch in enumerate(batches):
+            print("==========")
+            print("batch: ", i+1)
+            print("VALID DATA")
+            print(batch[0])
+            print("INVALID DATA")
+            print(batch[1])
+            print("==========")
 
-        # loop Valid data
-        for index, row in batch[0].iterrows():
-            data_object = create_data_object(table_name=table_name, row=row, is_valid_data=True)
-            session.add(data_object)
+            # loop Valid data
+            for index, row in batch[0].iterrows():
+                data_object = create_data_object(table_name=table_name, row=row, is_valid_data=True)
+                session.add(data_object)
+            
+            # save all invalid data into json log file
+            # Replace NaN values with empty strings in invalid df
+            invallid_df = batch[1].copy()
+            # add spacial case for "datetime" columns
+
+            if(table_name == "hired_employees"):
+                # drop datetime column
+                invallid_df = invallid_df.drop('datetime', axis=1)  # axis=1 specifies column
+                invallid_df = invallid_df.rename(columns={'datetime_str': 'datetime'}) 
+
+            invallid_df.fillna(0, inplace=True)
+            # TODO: improved data cleaning based of further requirements for loging errors
+            error_log = {
+                "file_name": file_name,
+                "table_name": table_name,
+                "batch_number": i+1,
+                "total_valid_records": len(batch[0]),
+                "total_invalid_records": len(batch[1]),
+                "invalid_data": invallid_df.to_dict(orient="records"),
+                "error":""
+            }
+            logs.append(error_log)
+
+        # comit each batch to db
+        session.commit()
+
+        # close db session and engine
+        session.close()
+        # engine.dispose() # consider keeping connection open?
+
+        # automate saving logs to json file for each request
         
-        # save all invalid data into json log file
-        # Replace NaN values with empty strings in invalid df
-        invallid_df = batch[1].copy()
-        # add spacial case for "datetime" columns
+        print("result_log: ", logs)
+        log_path = dump_json_to_file(logs, table_name)
+        print(f"Logs saved successfuly at path: {log_path}")
 
-        if(table_name == "hired_employees"):
-            # drop datetime column
-            invallid_df = invallid_df.drop('datetime', axis=1)  # axis=1 specifies column
-            invallid_df = invallid_df.rename(columns={'datetime_str': 'datetime'}) 
-
-        invallid_df.fillna(0, inplace=True)
-        # TODO: improved data cleaning based of further requirements for loging errors
+    except exc.IntegrityError as e:
+        session.rollback()
+        error_message = f"IntegrityError processing batch. All data rejected."
+        # error_message = f"\nIntegrityError processing batch. Table: {table_name}. Error: {e}"
+        # error_message += f"\nTraceback:\n{traceback.format_exc()}"
         error_log = {
-            "file_name": file_name,
-            "table_name": table_name,
-            "batch_number": i+1,
-            "total_valid_records": len(batch[0]),
-            "total_invalid_records": len(batch[1]),
-            "invalid_data": invallid_df.to_dict(orient="records")
+                "file_name": file_name,
+                "table_name": table_name,
+                "error": error_message,
         }
-        logs.append(error_log)
-
-    session.commit()
-
-    # close db session and engine
-    session.close()
-    # engine.dispose() # consider keeping connection open?
-
-    # automate saving logs to json file for each request
-    
-    print("result_log: ", logs)
-    log_path = dump_json_to_file(logs, table_name)
-    print(f"Logs saved successfuly at path: {log_path}")
+        print(error_log)
+        return error_log
+    except Exception as e:
+        session.rollback()
+        error_message = f"\nError processing batch. error:: {table_name}. error: {e}"
+        # error_message += f"\nTraceback:\n{traceback.format_exc()}"  # Add traceback information
+        print(error_message)
+        return {}
 
     return logs
 
