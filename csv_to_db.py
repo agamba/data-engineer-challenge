@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 
 # import db models
-from models import engine, Session, Department, Job, HiredEmployee, DepartmentFailed, JobFailed, HiredEmployeeFailed
+from models import engine, Session, Department, Job, HiredEmployee
 
 # import utility functions
 # TODO: need to move some vars to Flask app
@@ -42,7 +42,7 @@ def separate_valid_invalid_data(df_chunks, table_name):
         for df in df_chunks:
 
             # before start make a full copy of the df. to be used for logging purposes
-            # df_copy = df.copy()
+            df_copy = df.copy()
             
             """Define validation rules for each table"""
             if(table_name=="hired_employees"):
@@ -56,7 +56,7 @@ def separate_valid_invalid_data(df_chunks, table_name):
 
             # collect all valid and invalid data in each chunk
             # TODO: consider collecting also original df to report exact values in logging
-            results.append([valid_data, invalid_data])
+            results.append([valid_data, invalid_data, df_copy])
         
         return results
     
@@ -132,9 +132,69 @@ def validate_jobs(df):
     results = (df, invalid_data)
     return results
 
-def create_data_object():
-    return
+def create_data_object(table_name, row, is_valid_data):
+    """
+    Create a data object based on the table name and row data.
+    Create different data objects for valid and invalid data.
+    Args:
+        table_name (str): The name of the table.
+        row (pandas.Series): The row data.
+        is_valid_data (bool): The validity of the data.
+    Returns:
+        object: The data object using SQLAlchemy models.
+    """
+    try:
 
+        if(table_name == "departments"):
+            obj = {
+                "id": row["id"],
+                "department": row["department"],
+            }
+            if(is_valid_data):
+                return Department(**obj)
+            else:
+                return DepartmentFailed(**obj)
+
+        elif(table_name == "jobs"):
+            obj = {
+                "id": row["id"],
+                "job": row["job"],
+            }
+            if(is_valid_data):
+                return Job(**obj)
+            else:
+                return JobFailed(**obj)
+        elif(table_name == "hired_employees"):
+            
+            datetime_str = ""
+            if("datetime_str" in row):
+                datetime_str = row["datetime_str"]
+            
+            obj = {
+                    "employee_id": row["id"],
+                    "name": row["name"],
+                    "datetime": row["datetime"],
+                    "datetime_str": datetime_str,
+                    "department_id": row["department_id"],
+                    "job_id": row["job_id"],
+            }
+            if(is_valid_data):
+                return HiredEmployee(**obj)
+            else:
+                # remove datetime_str because it's not logged into HiredEmployeeFailed
+                del obj["datetime_str"]
+                return HiredEmployeeFailed(**obj)
+        else:
+            print(f"Table name {table_name} not recognized")
+            return None
+
+    
+    except Exception as e:
+        error_message = f"\nError creating data object for table: {table_name}. error: {e}"
+        error_message += f"\nTraceback:\n{traceback.format_exc()}"  # Add traceback information
+        print(error_message)
+        return None
+    
 def insert_data_to_db(batches, table_name):
     """
     """
@@ -154,13 +214,31 @@ def insert_data_to_db(batches, table_name):
         print(batch[0])
         print("INVALID DATA")
         print(batch[1])
+        print("==========")
 
-        # TODO: create data objects for valid data
-        data_object = create_data_object()
+        # loop Valid data
+        for index, row in batch[0].iterrows():
+            data_object = create_data_object(table_name=table_name, row=row, is_valid_data=True)
+            session.add(data_object)
+        
+        # save all invalid data into json log file
+        # Replace NaN values with empty strings in invalid df
+        copy_invallid = batch[1].copy()
+        copy_invallid.fillna(0, inplace=True)
+        error_log = {
+            "file_name": file_name,
+            "table_name": table_name,
+            "batch_number": i+1,
+            "total_valid_records": len(batch[0]),
+            "total_invalid_records": len(batch[1]),
+            "invalid_data": copy_invallid.to_dict(orient="records")
+        }
 
-        # TODO: create data objects for in valid data
-        data_object = create_data_object()
+        print(error_log)
 
+
+    
+    session.commit()
         
 
     results = ""
