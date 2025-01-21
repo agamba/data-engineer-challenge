@@ -33,14 +33,12 @@ class Job(Base):
 
 class HiredEmployee(Base):
     __tablename__ = 'hired_employees'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    employee_id = Column(Integer)
+    id = Column(Integer, primary_key=True, autoincrement=False)
     name = Column(String(255))  
     datetime = Column(DateTime)
     datetime_str = Column(String(255))  # added to store the raw datetime string
     department_id = Column(Integer)
     job_id = Column(Integer)
-
 
 class BackupFile(Base):
     __tablename__ = 'backups_files'

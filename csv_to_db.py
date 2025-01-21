@@ -167,7 +167,7 @@ def create_data_object(table_name, row, is_valid_data):
                 datetime_str = row["datetime_str"]
             
             obj = {
-                    "employee_id": row["id"],
+                    "id": row["id"],
                     "name": row["name"],
                     "datetime": row["datetime"],
                     "datetime_str": datetime_str,
