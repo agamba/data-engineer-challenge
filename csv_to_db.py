@@ -76,9 +76,13 @@ def separate_valid_invalid_data(df_chunks, table_name):
             print(error_message)
             return None
     
-
 def validate_hired_employees(df):
-    print("\tvalidate_hired_employees()")
+    """
+    Validate the data in the hired_employees table.
+    :param df: DataFrame containing the data to be validated.
+    :return: DataFrame containing the valid data.
+    """
+    print("\t validate_hired_employees()")
     # copy datetime column to new column for logging purposes and validating duplicates
     df['datetime_str'] = df['datetime'].copy()
 
@@ -99,11 +103,35 @@ def validate_hired_employees(df):
     return results
 
 def validate_departments(df):
-    return
+    print("\t validate_departments()")
+    
+    # convert id to integers in imported data
+    df['id'] = pd.to_numeric(df['id'], errors='coerce').astype('Int64') 
+
+    # collect all rows with NaN values in a new df
+    invalid_data = df[df.isnull().any(axis=1)]
+
+    # Remove rows with NaNs in required fields
+    df.dropna(subset=['id', 'department'], inplace=True)
+
+    results = (df, invalid_data)
+    return results
 
 
 def validate_jobs(df):
-    return
+    print("\t validate_jobs()")
+    
+    # convert id to integers in imported data
+    df['id'] = pd.to_numeric(df['id'], errors='coerce').astype('Int64') 
+
+    # collect all rows with NaN values in a new df
+    invalid_data = df[df.isnull().any(axis=1)]
+
+    # Remove rows with NaNs in required fields
+    df.dropna(subset=['id', 'job'], inplace=True)
+
+    results = (df, invalid_data)
+    return results
 
 #################################
 # load db session
@@ -119,16 +147,17 @@ columns_names_by_table = {
 
 # Define api variables
 ################################
-table_name = "hired_employees"
-file_name = './data/hired_employees.csv'
+# table_name = "hired_employees"
+# file_name = './data/hired_employees.csv'
 # file_name = './data/hired_employees_error.csv'
 
 # table_name = "departments"
 # file_name = './data/departments.csv'
-# file_name = './data/departments_part.csv'
+# file_name = './data/departments_error.csv'
 
-# table_name = "jobs"
+table_name = "jobs"
 # file_name = './data/jobs.csv'
+file_name = './data/jobs_error.csv'
 
 chunk_size = 1000
 
@@ -139,10 +168,11 @@ df_batches = load_csv_data(file_name, chunk_size, table_name)
 # 2. separate valid and invalid data for each batch
 result = separate_valid_invalid_data(df_batches, table_name)
 print("\t RESULTS: separate_valid_invalid_data")
-print(result)
-# for batch in result:
-#     print(batch[0].shape)
-#     print(batch[1].shape)
+print("VALID DATA")
+print(result[0])
+
+print("INVALID DATA")
+print(result[1])
 
 
 # validate_and_process_data_batches(session, batches, table_name=table_name, file_name=file_name)
