@@ -55,11 +55,11 @@
 \
 [X] Validate data using pandas: missing and incorrect values, date format
 \
-[ ] Create draft API with Flask
+[X] Verify mysql tables are dynamically created from models
 \
-[ ] Evaluate invalid ids for Department and Jobs?
+[X] Create draft API with Flask
 \
-[ ] Verify mysql tables are dynamically created from models
+[ ] Integrate csv to db function into API routes
 \
 [ ] Isolate db credentials (.env or other method? clound based?)
 \
