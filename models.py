@@ -49,7 +49,7 @@ class BackupFile(Base):
     datetime = Column(DateTime)
     avro_file = Column(String(255))
 
-# force delete all tables for development
+# force delete all tables on first run
 Base.metadata.drop_all(engine)
 
 # Create tables if do not exist
