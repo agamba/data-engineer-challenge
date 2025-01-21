@@ -54,11 +54,21 @@ def get_jobs():
 
 @app.route("/hired_employees", methods=['POST'])
 def get_hired_employees():
+    data = request.get_json()
+    # print("data: ", data)
+    file_name = data.get('file_name')
+    chunk_size = data.get('chunk_size')
+    table_name = data.get('table_name')
+    # print(file_name, chunk_size, table_name)
+
+    result_log = process_valid_invalid_results(file_name, chunk_size, table_name)
     response = {
+        "parameters": data,
         "message": "Hired Employees endpoint",
-        "error": ""
+        "error": "",
+        "result_log": result_log
     }
-    return jsonify(response)
+    return jsonify(response), 201
 
 
 @app.route("/backups/restore", methods=['POST'])
