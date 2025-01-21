@@ -200,7 +200,7 @@ def insert_data_to_db(batches, table_name):
     print("batches type: ", type(batches))
     print("batches len: ", len(batches))
     print("==========")
-
+    logs = []
     # loop over array of results (valild[0], invalid[1])
     # loop over batches
     for i, batch in enumerate(batches):
@@ -230,16 +230,14 @@ def insert_data_to_db(batches, table_name):
             "total_invalid_records": len(batch[1]),
             "invalid_data": copy_invallid.to_dict(orient="records")
         }
-        # TODO: save error log to json file
-        # print(error_log)
+        logs.append(error_log)
 
     session.commit()
 
     # close db session and engine
     session.close()
     # engine.dispose() # consider keeping connection open?
-
-    return error_log
+    return logs
 
 def process_valid_invalid_results(file_name, chunk_size, table_name):
     """
@@ -270,7 +268,43 @@ def process_valid_invalid_results(file_name, chunk_size, table_name):
 
     # 3. insert valid and invalid data into db
     results_db = insert_data_to_db(valid_invalid_array, table_name)
+    
+    return results_db
 
-    return True
+def get_datetime_string():
+    """Generates a string representing the current time """
+    now = datetime.datetime.now()
+#   return now.strftime('%Y-%m-%d_%H:%M:%S')
+    return now.strftime('%Y-%m-%d_%H_%M_%S')
 
-result_log = process_valid_invalid_results(file_name, chunk_size, table_name)
+def dump_json_to_file(data, table_name):
+  """Dumps JSON data to a file with error handling.
+
+  Args:
+    data: The Python dictionary or list to be dumped as JSON.
+    file_path: The path to the file where the JSON data will be written.
+
+  Returns:
+    True if the JSON data was successfully dumped, False otherwise.
+  """
+  try:
+
+    file_path = f"logs/{table_name}_{get_datetime_string()}.json"
+    # print("file_path: ", file_path)
+
+    with open(file_path, 'w') as f:
+      json.dump(data, f, indent=4)
+    return file_path
+  except IOError as e:
+    print(f"An error occurred while writing to the file: {e}")
+    return False
+  except json.JSONEncoder as e:
+    print(f"An error occurred while encoding JSON: {e}")
+    return False
+
+
+# result_logs = process_valid_invalid_results(file_name, chunk_size, table_name)
+# print("result_log: ", result_logs)
+# log_path = dump_json_to_file(result_logs, table_name)
+# print(f"Logs saved successfuly at path: {log_path}")
+
