@@ -22,20 +22,31 @@ def load_csv_data(file_name, chunk_size, table_name):
     print("Padas parsers object: ", df_chunks)
     return df_chunks
 
-def process_df_chunks(df_chunks, table_name):
-    # TODO: loop over chunks and validate and process data in each chunk
-    results = []
-    for df in df_chunks:
-        # 1. TODO: validate data in each chunk
-        # consider separating valid and invalid data in df and process them separately
-        # validate_data(df, table_name)
+def separate_valid_invalid_data(df_chunks, table_name):
+    """
+    This function is responsible for separating valid and invalid data in each chunk
+    Parameters:
+        df_chunks: pandas dataframe chunks
+        table_name: name of the table to be processed
+    Returns:
+        valid_data: valid data in each chunk
+        invalid_data: invalid data in each chunk
+    """
 
-        # before start make a full copy of the df. to be used for logging purposes
-        df_copy = df.copy()
-        
-        """Define validation rules for each table"""
-        try:
-            print()
+    results = [] # list to store results of each chunk
+    # loop over chunks and validate and process data in each chunk
+    
+    try:
+        for df in df_chunks:
+            # 1. TODO: validate data in each chunk
+            # consider separating valid and invalid data in df and process them separately
+            # validate_data(df, table_name)
+
+            # before start make a full copy of the df. to be used for logging purposes
+            df_copy = df.copy()
+            
+            """Define validation rules for each table"""
+
             if(table_name=="hired_employees"):
                 valid_data, invalid_data = validate_hired_employees(df)
                 # print("valid_data", valid_data)
@@ -52,23 +63,19 @@ def process_df_chunks(df_chunks, table_name):
             else:
                 print("table name not found")
 
+            # collect all valid and invalid data in each chunk
+            results.append([valid_data, invalid_data])
 
-        except Exception as e:
+            
+        # TODO: consider creating a dictionary to store valid and invalid stats ?
+        return valid_data, invalid_data
+    
+    except Exception as e:
             error_message = f"\nValidating batch. error: {e}"
             error_message += f"\nTraceback:\n{traceback.format_exc()}"
             print(error_message)
             return None
-        
-
-        # 2. TODO: insert valid data in sql 
-        # insert_data(df, table_name)
-        # consider using pandas to_sql() or other SQLAlchemy methods
-        # e.g. chunk.to_sql(name='your_table', con=engine, if_exists='append', index=False)
-
-        # 3. TODO: handle errors
-
     
-    return results
 
 def validate_hired_employees(df):
     print("\tvalidate_hired_employees()")
@@ -87,11 +94,12 @@ def validate_hired_employees(df):
     # Remove rows with NaNs in all required fields so we have only the valid data
     df.dropna(subset=['id', 'name', 'datetime', 'department_id', 'job_id'], inplace=True)
     
+    # return a tuple with valid data and invalid data
     results = (df, invalid_data)
     return results
 
 def validate_departments(df):
-    return 
+    return
 
 
 def validate_jobs(df):
@@ -128,8 +136,14 @@ chunk_size = 1000
 # 1. get data batches
 df_batches = load_csv_data(file_name, chunk_size, table_name)
 
-# 2. Validate and process df batches
-result = process_df_chunks(df_batches, table_name)
+# 2. separate valid and invalid data for each batch
+result = separate_valid_invalid_data(df_batches, table_name)
+print("\t RESULTS: separate_valid_invalid_data")
+print(result)
+# for batch in result:
+#     print(batch[0].shape)
+#     print(batch[1].shape)
+
 
 # validate_and_process_data_batches(session, batches, table_name=table_name, file_name=file_name)
 
