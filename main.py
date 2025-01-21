@@ -24,11 +24,9 @@ def get_departments():
     table_name = data.get('table_name')
     # print(file_name, chunk_size, table_name)
 
-    # assume drop table before import
-    # Department.__table__.drop(engine)
-
     result_log = process_valid_invalid_results(file_name, chunk_size, table_name)
     response = {
+        "parameters": data,
         "message": "Departments endpoint",
         "error": "",
         "result_log": result_log
@@ -36,15 +34,25 @@ def get_departments():
     return jsonify(response), 201
 
 
-@app.route("/jobs")
+@app.route("/jobs", methods=['POST'])
 def get_jobs():
-    response = {
-        "message": "Jobs endpoint",
-        "error": ""
-    }
-    return jsonify(response)
+    data = request.get_json()
+    # print("data: ", data)
+    file_name = data.get('file_name')
+    chunk_size = data.get('chunk_size')
+    table_name = data.get('table_name')
+    # print(file_name, chunk_size, table_name)
 
-@app.route("/hired_employees")
+    result_log = process_valid_invalid_results(file_name, chunk_size, table_name)
+    response = {
+        "parameters": data,
+        "message": "Jobes endpoint",
+        "error": "",
+        "result_log": result_log
+    }
+    return jsonify(response), 201
+
+@app.route("/hired_employees", methods=['POST'])
 def get_hired_employees():
     response = {
         "message": "Hired Employees endpoint",
@@ -53,7 +61,7 @@ def get_hired_employees():
     return jsonify(response)
 
 
-@app.route("/backups/restore")
+@app.route("/backups/restore", methods=['POST'])
 def restore_backups():
     response = {
         "message": "Restore Backups endpoint",
@@ -61,7 +69,7 @@ def restore_backups():
     }
     return jsonify(response)
 
-@app.route("/backups/create")
+@app.route("/backups/create", methods=['POST'])
 def create_backups():
     response = {
         "message": "Create Backups endpoint",
