@@ -132,23 +132,36 @@ def validate_jobs(df):
     results = (df, invalid_data)
     return results
 
+def create_data_object():
+    return
+
 def insert_data_to_db(batches, table_name):
+    """
+    """
     print("\t insert_data_to_db()")
     # load db session
     session = Session()
     print("batches type: ", type(batches))
     print("batches len: ", len(batches))
+    print("==========")
 
     # loop over array of results (valild[0], invalid[1])
     # loop over batches
-    for batch in batches:
-        print(type(batch))
-        # print(batch)
+    for i, batch in enumerate(batches):
+        print("==========")
+        print("batch: ", i+1)
         print("VALID DATA")
         print(batch[0])
-
         print("INVALID DATA")
         print(batch[1])
+
+        # TODO: create data objects for valid data
+        data_object = create_data_object()
+
+        # TODO: create data objects for in valid data
+        data_object = create_data_object()
+
+        
 
     results = ""
     
