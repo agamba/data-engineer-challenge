@@ -1,30 +1,10 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Import data from uploaded file</title>
+    <title>Home page</title>
   </head>
   <body>
-    <h1>Import data from uploaded file</h1>
-    <form method="post" enctype="multipart/form-data">
-      Select a csv file: <input type="file" name="file" /> <br /><br />
-      Endpoint:
-      <select name="table_name">
-        <option value="hired_employees">hired_employees</option>
-        <option value="departments">departments</option>
-        <option value="jobs">jobs</option></select
-      ><br /><br />
-      Chunk Size:
-      <input type="text" name="chunk_size" value="1000" size="4" /><br /><br />
-
-      <input type="submit" value="Upload" />
-
-      <h2>cURL Examples:</h2>
-
-      <pre><code>
-          curl -X POST -F "file=@data/departments.csv" \
-          -F "table_name=departments" \
-          -F "chunk_size=1000" http://127.0.0.1:8080/
-      </code></pre>
-    </form>
+    <h1>Data Engineering Challenge</h1>
+    <p>TODO: add links to each</p>
   </body>
 </html>
