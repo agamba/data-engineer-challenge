@@ -22,10 +22,22 @@ def index():
 @app.route("/import", methods=['GET', 'POST'])
 def get_import():
     if request.method == 'POST':
-        # TODO: process request 
+        # process request 
+        if 'file' not in request.files:
+            return jsonify({"error": "No file part in the request"}), 400
 
-        # TODO: validate data
+        file = request.files['file']
+        table_name  = request.form.get('table_name')  # Get table name        
+        chunk_size = request.form.get('chunk_size')  # Get chunk size
 
+        # validate data
+        if file.filename == '' or not table_name or not chunk_size: 
+            # return redirect(request.url)
+            return "Invalid data.\n\n", 400
+
+        # TODO: save submitted contents to a file
+
+        # get log results and file path to json log
         logs_result, file_path = process_valid_invalid_results(file_name, chunk_size, table_name)
         response = {
                 "parameters": "",
