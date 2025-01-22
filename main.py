@@ -15,6 +15,14 @@ app = Flask(__name__, template_folder='templates')
 
 # move to a simple version with a single route for all import functions
 
+# Set the upload folder path (adjust as needed)
+UPLOAD_FOLDER = 'uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Ensure the upload folder exists
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
 @app.route("/")
 def index():
     return render_template('index.html')
@@ -36,17 +44,33 @@ def get_import():
             return "Invalid data.\n\n", 400
 
         # TODO: save submitted contents to a file
+        if file:
+            contents = file.read().decode('utf-8')  # Decode assuming UTF-8 encoding
+            if(contents == ""):
+                return "File is empty."
+
+            try:
+                chunk_size = int(chunk_size)  # Convert chunk_size to integer
+                if chunk_size > 1000:
+                    return "Chunk size must less than 1000."
+            except ValueError:
+                return "Invalid chunk size. Please enter a number."
+
+
+            return 'File uploaded successfully! table_name: {}, Chunk size: {}'.format(table_name, chunk_size)
 
         # get log results and file path to json log
-        logs_result, file_path = process_valid_invalid_results(file_name, chunk_size, table_name)
-        response = {
-                "parameters": "",
-                "message": "",
-                "logs_result": logs_result,
-                "logs_file_path": file_path
-        }
-    
-    return jsonify(response), 201
+        # logs_result, file_path = process_valid_invalid_results(file_name, chunk_size, table_name)
+        # response = {
+        #         "parameters": "",
+        #         "message": "",
+        #         "logs_result": logs_result,
+        #         "logs_file_path": file_path
+        # }
+        # return jsonify(response), 201
+    else:
+        return render_template('import.html')
+    return "Testing import endpoint.\n\n", 201
 
 
 @app.route("/backups/restore", methods=['POST'])
