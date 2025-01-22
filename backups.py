@@ -82,13 +82,17 @@ def restore_backup(backup_file, model_class):
         metadata.reflect(engine, only=[table_name])  # Use reflect
         table = metadata.tables[table_name] 
 
-        # Insert data, handling DateTime conversion
+        # Insert data into the table
         for record in data:
-            if 'datetime' in record:
-                try: #try parsing assuming no timezone info
-                   record['datetime'] = datetime.fromtimestamp(record['datetime']/1000)
-                except: #try parsing with timezone info
+            if 'datetime' in record and isinstance(record['datetime'], int): # Check data type and if it exists
+                try:  # Try parsing without timezone info
+                    record['datetime'] = datetime.fromtimestamp(record['datetime'] / 1000)
+                except:  # Try parsing with timezone info
                     record['datetime'] = datetime.fromtimestamp(record['datetime'] / 1000, tz=timezone.utc)
+
+
+            elif 'datetime' in record and isinstance(record['datetime'], datetime):
+                pass #already a datetime - don't modify
             
             session.execute(table.insert().values(record))
 
