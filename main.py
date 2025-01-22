@@ -33,17 +33,16 @@ def get_departments():
     if(validate_request(data)):
         file_name, chunk_size, table_name = data
         print(file_name, chunk_size, table_name)
-        result_logs, file_path = process_valid_invalid_results(file_name, chunk_size, table_name)
+        logs_result, file_path = process_valid_invalid_results(file_name, chunk_size, table_name)
         response = {
             "parameters": data,
             "message": "Departments endpoint",
-            "result_logs": result_logs,
+            "logs_result": logs_result,
             "logs_file_path": file_path
         }
         return jsonify(response), 201
     else:
         return jsonify({"error": f"Missing mandatory fields"}), 400
-
 
 @app.route("/jobs", methods=['POST'])
 def get_jobs():
@@ -54,12 +53,12 @@ def get_jobs():
     table_name = data.get('table_name')
     # print(file_name, chunk_size, table_name)
 
-    result_logs, file_path = process_valid_invalid_results(file_name, chunk_size, table_name)
+    logs_result, file_path = process_valid_invalid_results(file_name, chunk_size, table_name)
     response = {
         "parameters": data,
         "message": "Jobes endpoint",
         "error": "",
-        "result_logs": result_logs,
+        "logs_result": logs_result,
         "logs_file_path": file_path
     }
     return jsonify(response), 201
@@ -73,12 +72,12 @@ def get_hired_employees():
     table_name = data.get('table_name')
     # print(file_name, chunk_size, table_name)
 
-    result_logs, file_path = process_valid_invalid_results(file_name, chunk_size, table_name)
+    logs_result, file_path = process_valid_invalid_results(file_name, chunk_size, table_name)
     response = {
         "parameters": data,
         "message": "Hired Employees endpoint",
         "error": "",
-        "result_logs": result_logs,
+        "logs_result": logs_result,
         "logs_file_path": file_path
     }
     return jsonify(response), 201
