@@ -334,6 +334,10 @@ def dump_json_to_file(data, table_name):
     return False
 
 # for degub only
+# file_name = "uploads/departments.csv"
+# file_name = "data/departments.csv"
+# chunk_size = 1000
+# table_name = "departments"
 # insert_logs, file_path = process_valid_invalid_results(file_name, chunk_size, table_name)
 
 

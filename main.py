@@ -10,11 +10,6 @@ from csv_to_db import *
 
 app = Flask(__name__, template_folder='templates')
 
-# Adjust code to recieved data also from web page demo
-# e.g. curl -X POST -F "file=@data/departments.csv" -F "table_name=departments" -F "chunk_size=1000" http://127.0.0.1:8080/
-
-# move to a simple version with a single route for all import functions
-
 # Set the upload folder path (adjust as needed)
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -27,6 +22,8 @@ if not os.path.exists(UPLOAD_FOLDER):
 def index():
     return render_template('index.html')
 
+# Adjust code to recieved data also from web page demo
+# e.g. curl -X POST -F "file=@data/departments.csv" -F "table_name=departments" -F "chunk_size=1000" http://127.0.0.1:8080/import
 @app.route("/import", methods=['GET', 'POST'])
 def get_import():
     if request.method == 'POST':
@@ -50,39 +47,38 @@ def get_import():
 
         # TODO: save submitted contents to a file
         if file:
-            contents = file.read().decode('utf-8')  # Decode assuming UTF-8 encoding
-            if(contents == ""):
-                return "File is empty."
-            
             filename = file.filename.replace(" ", "_")
             filename_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filename_path)
             print(f'File uploaded successfully at: {filename_path}')
 
+            # return "File uploaded successfully.", 201
+
             try:
                 chunk_size = int(chunk_size)  # Convert chunk_size to integer
                 if chunk_size > 1000:
-                    return "Chunk size must less than 1000."
+                    return "Chunk size must less or equal to 1000."
             except ValueError:
                 return "Invalid chunk size. Please enter a number."
 
+            print(f"PARAMS:table_name: {table_name}, Chunk size: {chunk_size}")
 
-            return 'File uploaded successfully! table_name: {}, Chunk size: {}'.format(table_name, chunk_size)
-
-        # get log results and file path to json log
-        # logs_result, file_path = process_valid_invalid_results(file_name, chunk_size, table_name)
-        # response = {
-        #         "parameters": "",
-        #         "message": "",
-        #         "logs_result": logs_result,
-        #         "logs_file_path": file_path
-        # }
+        # Process data and get logs
+        logs_result, file_path = process_valid_invalid_results(filename_path, chunk_size, table_name)
+        response = {
+                "table_name": table_name,
+                "chunk_size": chunk_size,
+                "filename_path":filename_path,
+                "message": "Data processed successfully.",
+                "logs_result": logs_result,
+                "logs_file_path": file_path
+        }
+        print(response)
+        return "data processed successfully", 201
         # return jsonify(response), 201
     else:
         # render the import page
         return render_template('import.html')
-    return "Testing import endpoint.\n\n", 201
-
 
 @app.route("/backups/restore", methods=['POST'])
 def restore_backups():
