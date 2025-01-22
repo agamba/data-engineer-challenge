@@ -43,11 +43,21 @@ def get_import():
             # return redirect(request.url)
             return "Invalid data.\n\n", 400
 
+        print()
+        print("table_name: ", table_name)
+        print("chunk_size: ", chunk_size)
+        print("file: ", file.filename)
+
         # TODO: save submitted contents to a file
         if file:
             contents = file.read().decode('utf-8')  # Decode assuming UTF-8 encoding
             if(contents == ""):
                 return "File is empty."
+            
+            filename = file.filename.replace(" ", "_")
+            filename_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filename_path)
+            print(f'File uploaded successfully at: {filename_path}')
 
             try:
                 chunk_size = int(chunk_size)  # Convert chunk_size to integer
@@ -69,6 +79,7 @@ def get_import():
         # }
         # return jsonify(response), 201
     else:
+        # render the import page
         return render_template('import.html')
     return "Testing import endpoint.\n\n", 201
 
