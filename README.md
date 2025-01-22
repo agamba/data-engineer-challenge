@@ -41,6 +41,13 @@
 ├── .gitignore # Files to ignore in git
 \
 ├── README.md # Project documentation
+\
+├── data # Directory for sample data
+\
+├── uploads # Directory for data uploaded by users
+\
+├── logs # Directory for json logs
+\
 
 # Development plan - Todo App Code
 
@@ -59,11 +66,17 @@
 \
 [X] Create draft API with Flask
 \
-[ ] Integrate csv to db function into API routes
+[X] Integrate csv to db import function into API routes
+\
+[ ] Implement Backup Create and Restore functionality
+\
+[ ] Implement Reports
 \
 [ ] Isolate db credentials (.env or other method? clound based?)
 \
-[ ] Evaluate best practice for logging failed transactions
+[X] Evaluate best practice for logging failed transactions
+\
+[X] Log transactions in json file in logs folder
 
 # Considerations
 
