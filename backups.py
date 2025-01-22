@@ -3,14 +3,14 @@ import traceback
 import os
 import uuid
 import fastavro
-from sqlalchemy import create_engine, MetaData, select, Column, Table
+from sqlalchemy import insert, MetaData, Column, Table
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.sqltypes import Integer, String, DateTime, Boolean, Float, Numeric
-from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime, timezone
 
+
 # re use sqlAlchemy engine from models.py
-from models import engine, Job, Department, HiredEmployee
+from models import engine, Job, Department, HiredEmployee, BackupFile
 
 Session = sessionmaker(bind=engine)
 metadata = MetaData()
@@ -21,7 +21,13 @@ BACKUPS_FOLDER = 'backups'
 # Ensure the backups folder exists
 if not os.path.exists(BACKUPS_FOLDER):
     os.makedirs(BACKUPS_FOLDER)
+
 def get_avro_type(sql_type):
+    """
+    Map SQLAlchemy types to Avro types.
+    :param sql_type: SQLAlchemy type
+    :return: Avro type
+    """
     if isinstance(sql_type, Numeric):  # Check for Numeric type first
         return {"type": "bytes", "logicalType": "decimal", "precision": sql_type.precision, "scale": sql_type.scale}
     type_map = {
@@ -34,10 +40,13 @@ def get_avro_type(sql_type):
     return type_map.get(type(sql_type), "string") 
 
 def create_backup(model_class):
-    """Creates an Avro backup of a SQLAlchemy model's table."""
+    """
+    Creates an Avro backup of a SQLAlchemy model's table.
+    :param model_class: SQLAlchemy model class
+    """
     try:
         table_name = model_class.__tablename__
-        backup_file = f"{BACKUPS_FOLDER}/{table_name}_{uuid.uuid4()}.avro"
+        backup_file = f"{table_name}_{uuid.uuid4()}.avro"
 
         session = Session()
         rows = session.query(model_class).all()
@@ -57,19 +66,32 @@ def create_backup(model_class):
                 row_dict['datetime'] = int(row_dict['datetime'].timestamp() * 1000)
             avro_rows.append(row_dict)
 
-        with open(backup_file, "wb") as f:
+        with open(f"{BACKUPS_FOLDER}/{backup_file}", "wb") as f:
             fastavro.writer(f, fastavro.parse_schema(schema), avro_rows)
-
 
         print(f"Backup of table '{table_name}' created at: {backup_file}")
 
-        return backup_file
-
+        return {
+            "action": "create_backup",
+            "status": "success",
+            "file_name": backup_file,
+        }
+    
     except Exception as e:
         print(f"Error creating backup: {e}")
+        return {
+            "action": "create_backup",
+            "status": "error",
+            "error": str(e)
+        }
         
 def restore_backup(backup_file, model_class):
-    """Restores a table from an Avro backup file."""
+    """
+    Restores a table from an Avro backup file.
+    Args:
+        backup_file (str): The path to the Avro backup file.
+        model_class (Base): The SQLAlchemy model class corresponding to the table to be restored.
+    """
     try:
         table_name = model_class.__tablename__
 
@@ -101,22 +123,23 @@ def restore_backup(backup_file, model_class):
 
         print(f"Backup '{backup_file}' restored to table '{table_name}'")
 
+        # TODO: Add log in the database
+        return {
+            "action": "restore_backup",
+            "status": "success",
+            "table": table_name
+        }
+
     except Exception as e:
         print(f"Error restoring backup: {e}")
+        return {
+            "action": "restore_backup",
+            "status": "error",
+            "error": str(e)
+        }
 
 
+# result = create_backup(Department)
+result = restore_backup("departments_834dad95-003c-4c7e-8413-95b7e491e396.avro", Department)
 
-# Create backups for each table
-# create_backup(Department)
-# create_backup(Job)
-# create_backup(HiredEmployee)
-
-
-backup_filepath = "departments_2c19cbac-6315-41c0-9682-26a94684dabf.avro"
-restore_backup(backup_filepath, Department)
-
-backup_filepath = "hired_employees_f957ff44-8f1a-44e4-acf7-8e7a31dd5721.avro"
-restore_backup(backup_filepath, HiredEmployee)
-
-backup_filepath = "jobs_d86deeca-fe53-4397-bafc-11b230d7e1d4.avro"
-restore_backup(backup_filepath, Job)
+print(result)
