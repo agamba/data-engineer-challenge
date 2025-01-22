@@ -22,6 +22,13 @@ if not os.path.exists(UPLOAD_FOLDER):
 def index():
     return render_template('index.html')
 
+@app.route("/dashboard")
+def dashboard():
+    return render_template('dashboard.html')
+
+def index():
+    return render_template('index.html')
+
 # Adjust code to recieved data also from web page demo
 # e.g. curl -X POST -F "file=@data/departments.csv" -F "table_name=departments" -F "chunk_size=1000" http://127.0.0.1:8080/import
 @app.route("/import", methods=['GET', 'POST'])
@@ -80,27 +87,33 @@ def get_import():
         # render the import page
         return render_template('import.html')
 
-@app.route("/backups/restore", methods=['POST'])
-def restore_backups():
-    response = {
-        "message": "Restore Backups endpoint",
-        "error": ""
-    }
-    return jsonify(response)
 
-# NOTE: use only one end point for create and restore backups: simpler approch
-@app.route("/backups", methods=['POST'])
+@app.route("/backups", methods=['GET', 'POST'])
 def manage_backups():
-    response = {
-        "message": "Create/Restore Backups endpoint",
-        "error": ""
-    }
-    return jsonify(response)
+    if request.method == 'POST':
+        # TODO: Implement the logic to create/restore backups
+
+        
+        backup_file_name = "backup_file_name"
+
+        # result = create_backup(Department)
+        # result = restore_backup(backup_file_name, Department)
+        # print(result)
+        return "Backup created/restored successfully\n\n", 201
+
+        response = {
+            "message": "Create/Restore Backups endpoint",
+            "error": ""
+        }
+        return jsonify(response)
+    else:
+        # get a list of existing backups
+        backups = ["backup1", "backup2", "backup3", "backup4"]
+
+        return render_template('backups.html' , backups=backups)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
-
-
 
 
 
