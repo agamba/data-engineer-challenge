@@ -10,76 +10,30 @@ from csv_to_db import *
 
 app = Flask(__name__, template_folder='templates')
 
-def validate_request(data):
-    """
-    Validate the request data to ensure all mandatory fields are present.
-    :param data: The request data as a dictionary.
-    :return: True if all mandatory fields are present, False otherwise.
-    """
-    # mandatory fields for data import requests
-    mandatory_fields = ['file_name', 'chunk_size', 'table_name']
-    for field in mandatory_fields:
-        if field not in data and field != "":
-            return False
-    return True
+# Adjust code to recieved data also from web page demo
+# e.g. curl -X POST -F "file=@data/departments.csv" -F "table_name=departments" -F "chunk_size=1000" http://127.0.0.1:8080/
+
+# move to a simple version with a single route for all import functions
 
 @app.route("/")
 def index():
     return render_template('index.html')
 
-@app.route("/departments", methods=['POST'])
-def get_departments():
-    data = request.get_json()
-    if(validate_request(data)):
-        file_name, chunk_size, table_name = data
-        print(file_name, chunk_size, table_name)
+@app.route("/import", methods=['GET', 'POST'])
+def get_import():
+    if request.method == 'POST':
+        # TODO: process request 
+
+        # TODO: validate data
+
         logs_result, file_path = process_valid_invalid_results(file_name, chunk_size, table_name)
         response = {
-            "parameters": data,
-            "message": "Departments endpoint",
-            "logs_result": logs_result,
-            "logs_file_path": file_path
+                "parameters": "",
+                "message": "",
+                "logs_result": logs_result,
+                "logs_file_path": file_path
         }
-        return jsonify(response), 201
-    else:
-        return jsonify({"error": f"Missing mandatory fields"}), 400
-
-@app.route("/jobs", methods=['POST'])
-def get_jobs():
-    data = request.get_json()
-    # print("data: ", data)
-    file_name = data.get('file_name')
-    chunk_size = data.get('chunk_size')
-    table_name = data.get('table_name')
-    # print(file_name, chunk_size, table_name)
-
-    logs_result, file_path = process_valid_invalid_results(file_name, chunk_size, table_name)
-    response = {
-        "parameters": data,
-        "message": "Jobes endpoint",
-        "error": "",
-        "logs_result": logs_result,
-        "logs_file_path": file_path
-    }
-    return jsonify(response), 201
-
-@app.route("/hired_employees", methods=['POST'])
-def get_hired_employees():
-    data = request.get_json()
-    # print("data: ", data)
-    file_name = data.get('file_name')
-    chunk_size = data.get('chunk_size')
-    table_name = data.get('table_name')
-    # print(file_name, chunk_size, table_name)
-
-    logs_result, file_path = process_valid_invalid_results(file_name, chunk_size, table_name)
-    response = {
-        "parameters": data,
-        "message": "Hired Employees endpoint",
-        "error": "",
-        "logs_result": logs_result,
-        "logs_file_path": file_path
-    }
+    
     return jsonify(response), 201
 
 
@@ -91,10 +45,11 @@ def restore_backups():
     }
     return jsonify(response)
 
-@app.route("/backups/create", methods=['POST'])
-def create_backups():
+# NOTE: use only one end point for create and restore backups: simpler approch
+@app.route("/backups", methods=['POST'])
+def manage_backups():
     response = {
-        "message": "Create Backups endpoint",
+        "message": "Create/Restore Backups endpoint",
         "error": ""
     }
     return jsonify(response)
