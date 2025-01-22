@@ -50,7 +50,7 @@ def create_backup(model_class):
 
         session = Session()
         rows = session.query(model_class).all()
-        session.close()
+        # session.close()
 
         schema = {
             "type": "record",
@@ -70,7 +70,21 @@ def create_backup(model_class):
             fastavro.writer(f, fastavro.parse_schema(schema), avro_rows)
 
         print(f"Backup of table '{table_name}' created at: {backup_file}")
+        backup_data = {
+            'table_name': table_name,
+            'datetime': datetime.now(),
+            'avro_file': backup_file
+        }
+        
+        # Create the insert statement
+        stmt = insert(BackupFile).values(**backup_data)
 
+        # Execute the insert statement within a session
+        with Session() as session:
+            session.execute(stmt)
+            session.commit()
+            session.close()
+            
         return {
             "action": "create_backup",
             "status": "success",
@@ -138,8 +152,3 @@ def restore_backup(backup_file, model_class):
             "error": str(e)
         }
 
-
-# result = create_backup(Department)
-result = restore_backup("departments_834dad95-003c-4c7e-8413-95b7e491e396.avro", Department)
-
-print(result)
