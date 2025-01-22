@@ -10,11 +10,7 @@ import json
 
 
 # import db models
-from models import engine, Session, Department, Job, HiredEmployee, exc
-
-# import utility functions
-# TODO: need to move some vars to Flask app
-from util import file_name, chunk_size, table_name, columns_names_by_table
+from models import engine, Session, Department, Job, HiredEmployee, exc, columns_names_by_table
 
 """Define csv to db functions"""
 #################################
@@ -64,7 +60,7 @@ def separate_valid_invalid_data(df_chunks, table_name):
     
     except Exception as e:
             error_message = f"\nValidating batch. error: {e}"
-            error_message += f"\nTraceback:\n{traceback.format_exc()}"
+            # error_message += f"\nTraceback:\n{traceback.format_exc()}"
             print(error_message)
             return None
     
@@ -232,7 +228,6 @@ def insert_data_to_db(batches, table_name):
             invallid_df.fillna(0, inplace=True)
             # TODO: improved data cleaning based of further requirements for loging errors
             error_log = {
-                "file_name": file_name,
                 "table_name": table_name,
                 "batch_number": i+1,
                 "total_valid_records": len(batch[0]),
@@ -252,16 +247,15 @@ def insert_data_to_db(batches, table_name):
         # automate saving logs to json file for each request
         
         print("result_log: ", logs)
-        log_path = dump_json_to_file(logs, table_name)
-        print(f"Logs saved successfuly at path: {log_path}")
+        file_path = dump_json_to_file(logs, table_name)
+        print(f"Logs saved successfuly at path: {file_path}")
 
     except exc.IntegrityError as e:
         session.rollback()
-        error_message = f"IntegrityError processing batch. Data in batch rejected."
+        error_message = f"IntegrityError processing batch in insert_data_to_db(). Data in batch rejected."
         # error_message = f"\nIntegrityError processing batch. Table: {table_name}. Error: {e}"
         # error_message += f"\nTraceback:\n{traceback.format_exc()}"
         error_log = {
-                "file_name": file_name,
                 "table_name": table_name,
                 "error": error_message,
         }
@@ -269,12 +263,12 @@ def insert_data_to_db(batches, table_name):
         return error_log
     except Exception as e:
         session.rollback()
-        error_message = f"\nError processing batch. error:: {table_name}. error: {e}"
+        error_message = f"\nError processing batch. error for table: {table_name}. error: {e}"
         # error_message += f"\nTraceback:\n{traceback.format_exc()}"  # Add traceback information
         print(error_message)
         return {}
 
-    return logs
+    return logs, file_path
 
 def process_valid_invalid_results(file_name, chunk_size, table_name):
     """
@@ -304,9 +298,9 @@ def process_valid_invalid_results(file_name, chunk_size, table_name):
         return False
 
     # 3. insert valid and invalid data into db
-    results_db = insert_data_to_db(valid_invalid_array, table_name)
+    insert_logs, file_path = insert_data_to_db(valid_invalid_array, table_name)
     
-    return results_db
+    return insert_logs, file_path
 
 def get_datetime_string():
     """Generates a string representing the current time """
@@ -339,7 +333,7 @@ def dump_json_to_file(data, table_name):
     print(f"An error occurred while encoding JSON: {e}")
     return False
 
-
-# result_logs = process_valid_invalid_results(file_name, chunk_size, table_name)
+# for degub only
+# insert_logs, file_path = process_valid_invalid_results(file_name, chunk_size, table_name)
 
 

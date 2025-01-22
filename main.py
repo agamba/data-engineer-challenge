@@ -1,11 +1,11 @@
 import os
 from flask import Flask, jsonify, render_template, request
 import json
+import traceback
 
 # import custom functions
 from models import *
 from csv_to_db import *
-from util import *
 
 
 app = Flask(__name__, template_folder='templates')
@@ -17,19 +17,19 @@ def index():
 
 @app.route("/departments", methods=['POST'])
 def get_departments():
+
     data = request.get_json()
-    # print("data: ", data)
-    file_name = data.get('file_name')
+    file_name_q = data.get('file_name')
     chunk_size = data.get('chunk_size')
     table_name = data.get('table_name')
-    # print(file_name, chunk_size, table_name)
+    # print(file_name_q, chunk_size, table_name)
 
-    result_log = process_valid_invalid_results(file_name, chunk_size, table_name)
+    result_logs, file_path = process_valid_invalid_results(file_name_q, chunk_size, table_name)
     response = {
         "parameters": data,
         "message": "Departments endpoint",
-        "error": "",
-        "result_log": result_log
+        "result_logs": result_logs,
+        "logs_file_path": file_path
     }
     return jsonify(response), 201
 
@@ -43,12 +43,13 @@ def get_jobs():
     table_name = data.get('table_name')
     # print(file_name, chunk_size, table_name)
 
-    result_log = process_valid_invalid_results(file_name, chunk_size, table_name)
+    result_logs, file_path = process_valid_invalid_results(file_name, chunk_size, table_name)
     response = {
         "parameters": data,
         "message": "Jobes endpoint",
         "error": "",
-        "result_log": result_log
+        "result_logs": result_logs,
+        "logs_file_path": file_path
     }
     return jsonify(response), 201
 
@@ -61,12 +62,13 @@ def get_hired_employees():
     table_name = data.get('table_name')
     # print(file_name, chunk_size, table_name)
 
-    result_log = process_valid_invalid_results(file_name, chunk_size, table_name)
+    result_logs, file_path = process_valid_invalid_results(file_name, chunk_size, table_name)
     response = {
         "parameters": data,
         "message": "Hired Employees endpoint",
         "error": "",
-        "result_log": result_log
+        "result_logs": result_logs,
+        "logs_file_path": file_path
     }
     return jsonify(response), 201
 

@@ -6,6 +6,12 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 # Load environment variables from .env file
 load_dotenv()
 
+columns_names_by_table = {
+    "departments": ['id', 'department'],
+    "jobs": ['id', 'job'],
+    "hired_employees": ['id', 'name', 'datetime', 'department_id', 'job_id']
+}
+
 """Create a database engine using environment variables."""
 host = os.getenv("MYSQL_HOST")
 user = os.getenv("MYSQL_USER")
