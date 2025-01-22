@@ -74,7 +74,7 @@ def get_import():
                 "logs_file_path": file_path
         }
         print(response)
-        return "data processed successfully", 201
+        return "data processed successfully\n\n", 201
         # return jsonify(response), 201
     else:
         # render the import page
