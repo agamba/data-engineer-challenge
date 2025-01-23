@@ -48,16 +48,36 @@ class HiredEmployee(Base):
 
 class BackupFile(Base):
     __tablename__ = 'backups_files'
-    id = Column(Integer, primary_key=True, autoincrement=False)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     table_name = Column(String(255))
     datetime = Column(DateTime)
     avro_file = Column(String(255))
-
-# force delete all tables on first run
-Base.metadata.drop_all(engine)
 
 # Create tables if do not exist
 Base.metadata.create_all(engine)
 
 # bind session to engine
 Session = sessionmaker(bind=engine)
+
+def delete_all_tables():
+    Base.metadata.drop_all(engine)
+
+def delete_table(table_name):
+    table = Base.metadata.tables[table_name]
+    table.drop(engine)
+
+def get_backup_files():
+    session = Session()
+    backup_files = session.query(BackupFile).all()
+    backups = []
+    for backup in backup_files:
+        record = {
+            "table_name": backup.table_name,
+            "datetime": backup.datetime,
+            "avro_file": backup.avro_file
+
+        }
+        backups.append(record)
+    session.close()
+    return backups
+

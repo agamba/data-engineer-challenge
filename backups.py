@@ -152,3 +152,8 @@ def restore_backup(backup_file, model_class):
             "error": str(e)
         }
 
+# for debugging purposes
+# result = create_backup(Department)
+# result = create_backup(BackupFile)
+# result = restore_backup("backups_files_715885a3-9fd2-4fc8-89c6-7ea35c36194c.avro", BackupFile)
+# print(result)

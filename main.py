@@ -92,7 +92,6 @@ def get_import():
 def manage_backups():
     if request.method == 'POST':
         # TODO: Implement the logic to create/restore backups
-
         
         backup_file_name = "backup_file_name"
 
@@ -108,12 +107,11 @@ def manage_backups():
         return jsonify(response)
     else:
         # get a list of existing backups
-        backups = ["backup1", "backup2", "backup3", "backup4"]
+        # backups = ["backup1", "backup2", "backup3", "backup4"]
+        backups = get_backup_files()
 
         return render_template('backups.html' , backups=backups)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
-
-
 
