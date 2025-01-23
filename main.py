@@ -86,29 +86,32 @@ def get_import():
         return render_template('import.html')
 
 
-@app.route("/backups", methods=['GET', 'POST'])
-def manage_backups():
+# BACKUPS
+@app.route("/backups")
+def backup_page():
+    # load and dispaly existing backups
+    backups = get_backup_files()
+    return render_template('backups.html' , backups=backups)
+
+@app.route("/backups-restore", methods=['GET', 'POST'])
+def backup_restore():
+    # TODO: Implement the logic restore backup
+    # TODO: determine the table name from the backup file name
+    restore_file_name = request.form.get('restore_file_name')  # Get restore file name
+    print(f"restore_file_name: {restore_file_name}")
     if request.method == 'POST':
-        # TODO: Implement the logic to create/restore backups
-        
-        backup_file_name = "backup_file_name"
+        restore_file_name = request.form.get('restore_file_name')  # Get restore file name
+        print(f"restore_file_name: {restore_file_name}")
+        if restore_file_name == "":
+            return "Please select a backup file to restore."
+        # TODO: ready to restore the backup
+        return f"Ready to restore backup. File name: {restore_file_name}\n\n", 201
 
-        # result = create_backup(Department)
-        # result = restore_backup(backup_file_name, Department)
-        # print(result)
-        return "Backup created/restored successfully\n\n", 201
-
-        response = {
-            "message": "Create/Restore Backups endpoint",
-            "error": ""
-        }
-        return jsonify(response)
-    else:
-        # get a list of existing backups
-        # backups = ["backup1", "backup2", "backup3", "backup4"]
-        backups = get_backup_files()
-
-        return render_template('backups.html' , backups=backups)
+@app.route("/backups-create", methods=['GET', 'POST'])
+def backup_create():
+    if request.method == 'POST':
+        table_name = request.form.get('table_name')  # Get table_name
+        return f"Ready to proceed with create backup. Table name: {table_name}\n\n", 201
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
