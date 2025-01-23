@@ -8,7 +8,6 @@ import pandas as pd
 import numpy as np
 import json
 
-
 # import db models
 from models import engine, Session, Department, Job, HiredEmployee, exc, columns_names_by_table
 

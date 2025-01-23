@@ -5,6 +5,3 @@ pytest
 Flask
 SQLAlchemy
 pymysql
-
-
-
