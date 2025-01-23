@@ -68,15 +68,21 @@
 \
 [X] Integrate csv to db import function into API routes
 \
-[ ] Implement Backup Create and Restore functionality
+[X] Implement Backup Create and Restore functionality
 \
-[ ] Implement Reports
+[ ] Add Backup Create and Restore to UI
+\
+[ ] Implement Reports for requirements
+\
+[ ] Implement Reports using ploty and chart.js
 \
 [ ] Isolate db credentials (.env or other method? clound based?)
 \
 [X] Evaluate best practice for logging failed transactions
 \
 [X] Log transactions in json file in logs folder
+\
+[ ] Implement securuty, e.g. required API_KEY
 
 # Considerations
 
