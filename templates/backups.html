@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Backups</title>
+  </head>
+  <body>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/import">Import data</a></li>
+      <li><a href="/backups">Backups</a></li>
+      <li><a href="/dashboard">Dashboard</a></li>
+    </ul>
+    <h1>Backups</h1>
+
+    <h1>Create a new backup:</h1>
+    <form action="/backups" method="post">
+      <label for="table_name">Table Name:</label>
+      <select id="table_name" name="table_name" required>
+        <option value="">Select a table</option>  <!-- Default option -->
+        <option value="table1">Table 1</option>
+        <option value="table2">Table 2</option>
+        <option value="table3">Table 3</option>
+      </select>
+      <button type="submit">Create Backup</button>
+
+    <h1>Available backups:</h1>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Table Name</th>
+          <th>Date</th>
+          <th>File Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for backup in backups %}
+        <tr>
+          <td>{{ backup.table_name | default('N/A') }}</td>
+          <td>{{ backup.datetime | default('N/A') }}</td>
+          <td>{{ backup.avro_file | default('N/A') }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </body>
+</html>
