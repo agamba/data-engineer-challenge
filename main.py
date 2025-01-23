@@ -52,14 +52,12 @@ def get_import():
         print("chunk_size: ", chunk_size)
         print("file: ", file.filename)
 
-        # TODO: save submitted contents to a file
+        # save submitted contents to a file
         if file:
             filename = file.filename.replace(" ", "_")
             filename_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filename_path)
             print(f'File uploaded successfully at: {filename_path}')
-
-            # return "File uploaded successfully.", 201
 
             try:
                 chunk_size = int(chunk_size)  # Convert chunk_size to integer
