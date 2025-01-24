@@ -52,7 +52,7 @@ def create_backup(table_name):
     """
     try:
         model_class = TABLES[table_name]
-        backup_file = f"{table_name}_{uuid.uuid4()}.avro"
+        backup_file = f"{table_name}___{uuid.uuid4()}.avro"
         session = Session()
         rows = session.query(model_class).all()
 
