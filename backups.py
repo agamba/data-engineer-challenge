@@ -48,8 +48,11 @@ def get_avro_type(sql_type):
 
 def create_backup(table_name):
     """
-    Creates an Avro backup of a SQLAlchemy model's table.
+    Creates an Avro backup of a sql table.
     :param table_name: Name of the table to back up
+    Returns:
+        bool: True if the backup was restored successfully, False otherwise.
+        dict: A dictionary containing the action, status, and any error messages.
     """
     try:
         model_class = TABLES[table_name]
@@ -97,15 +100,16 @@ def create_backup(table_name):
             "status": "success",
             "file_name": backup_file,
         }
-    
     except SQLAlchemyError as e:
         # print(f"Error during commit: {e}")
+        session.rollback()
         return False, {
             "action": "create_backup",
             "status": "error",
             "error": str(e)
         }
     except Exception as e:
+        session.rollback()
         return False, {
             "action": "create_backup",
             "status": "error",
@@ -114,15 +118,16 @@ def create_backup(table_name):
         
 def restore_backup(table_name, backup_file):
     """
-    Restores a table from an Avro backup file.
+    Restores a sql table from an Avro backup file.
 
     Args:
         table_name (str): The name of the table to restore.
         backup_file (str): The name of the Avro backup file.
+    Returns:
+        bool: True if the backup was restored successfully, False otherwise.
+        dict: A dictionary containing the action, status, and any error messages.
     """
     try:
-        # table_name = model_class.__tablename__
-
         with open(f"{BACKUPS_FOLDER}/{backup_file}", "rb") as f:
             avro_reader = fastavro.reader(f)
             data = list(avro_reader)  # Read all records into a list
@@ -139,22 +144,14 @@ def restore_backup(table_name, backup_file):
                     record['datetime'] = datetime.fromtimestamp(record['datetime'] / 1000)
                 except:  # Try parsing with timezone info
                     record['datetime'] = datetime.fromtimestamp(record['datetime'] / 1000, tz=timezone.utc)
-
-
             elif 'datetime' in record and isinstance(record['datetime'], datetime):
                 pass #already a datetime - don't modify
-            
-            # print(f"{table.insert().values(record)}")
-            print(record)
-
             session.execute(table.insert().values(record))
-
         session.commit()
         session.close()
 
         print(f"Backup file: '{backup_file}' restored to table '{table_name}'")
 
-        # TODO: Add log in the database
         return True, {
             "action": "restore_backup",
             "status": "success",
@@ -163,12 +160,14 @@ def restore_backup(table_name, backup_file):
         }
 
     except SQLAlchemyError as e:
+        session.rollback()
         return False, {
             "action": "restore_backup",
             "status": "SQLAlchemyError",
             "error": str(e)
         }
     except Exception as e:
+        session.rollback()
         print(f"Error restoring backup: {e}")
         return False, {
             "action": "restore_backup",
