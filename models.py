@@ -80,4 +80,3 @@ def get_backup_files():
         backups.append(record)
     session.close()
     return backups
-

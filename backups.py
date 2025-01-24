@@ -39,18 +39,29 @@ def get_avro_type(sql_type):
     }
     return type_map.get(type(sql_type), "string") 
 
-def create_backup(model_class):
+def create_backup(table_name):
     """
     Creates an Avro backup of a SQLAlchemy model's table.
     :param model_class: SQLAlchemy model class
     """
     try:
-        table_name = model_class.__tablename__
+        # addded table name to model mapping
+        # TODO: optimize this approach
+        if table_name == 'jobs':
+            model_class = Job
+        elif table_name == 'departments':
+            model_class = Department
+        elif table_name == 'hired_employees':
+            model_class = HiredEmployee
+        else:
+            raise ValueError(f"Unknown table name: {table_name}")
+        
         backup_file = f"{table_name}_{uuid.uuid4()}.avro"
 
         session = Session()
         rows = session.query(model_class).all()
-        # session.close()
+        # TODO: check when is better to close the session
+        session.close()
 
         schema = {
             "type": "record",

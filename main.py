@@ -6,6 +6,7 @@ import traceback
 # import custom functions
 from models import *
 from csv_to_db import *
+from backups import create_backup, restore_backup
 
 
 app = Flask(__name__, template_folder='templates')
@@ -110,8 +111,19 @@ def backup_restore():
 @app.route("/backups-create", methods=['GET', 'POST'])
 def backup_create():
     if request.method == 'POST':
-        table_name = request.form.get('table_name')  # Get table_name
-        return f"Ready to proceed with create backup. Table name: {table_name}\n\n", 201
+        table_name = request.form.get('table_name')
+        
+        if table_name == "":
+            return "Please select a table to backup."
+        
+        # Perform simple validation
+        valid_tables = ["hired_employees", "departments", "jobs"]
+        if table_name not in valid_tables:
+            return "Invalid table name."
+
+        result = create_backup(table_name)        
+        print(f"result: {result}")
+        return f"Backup created for Table name: {table_name}\n\n", 201
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
