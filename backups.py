@@ -145,15 +145,16 @@ def restore_backup(table_name, backup_file):
         print(f"Backup file: '{backup_file}' restored to table '{table_name}'")
 
         # TODO: Add log in the database
-        return {
+        return True, {
             "action": "restore_backup",
             "status": "success",
-            "table": table_name
+            "backup_file": backup_file,
+            "table_name": table_name
         }
 
     except Exception as e:
         print(f"Error restoring backup: {e}")
-        return {
+        return False, {
             "action": "restore_backup",
             "status": "error",
             "error": str(e)

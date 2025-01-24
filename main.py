@@ -112,9 +112,12 @@ def backup_restore():
         # for now quick and dirty approach
         table_name = restore_file_name.split("___")[0]
 
-        result = restore_backup(table_name, restore_file_name)
-        print(f"result: {result}")
-        return f"Backup restored. File name: {restore_file_name} - table name: {table_name}\n\n", 201
+        is_vallid, result = restore_backup(table_name, restore_file_name)
+        if not is_vallid:
+            return f"Error restoring backup: {result}"
+        
+        
+        return f"Backup restored! File name: {restore_file_name} - table name: {table_name}\n\n{result}", 201
 
 @app.route("/backups-create", methods=['GET', 'POST'])
 def backup_create():
