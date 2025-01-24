@@ -98,15 +98,24 @@ def backup_page():
 def backup_restore():
     # TODO: Implement the logic restore backup
     # TODO: determine the table name from the backup file name
-    restore_file_name = request.form.get('restore_file_name')  # Get restore file name
+    table_name = request.form.get('table_name')
+    restore_file_name = request.form.get('restore_file_name')
     print(f"restore_file_name: {restore_file_name}")
     if request.method == 'POST':
-        restore_file_name = request.form.get('restore_file_name')  # Get restore file name
+        restore_file_name = request.form.get('restore_file_name')
         print(f"restore_file_name: {restore_file_name}")
+        
         if restore_file_name == "":
             return "Please select a backup file to restore."
-        # TODO: ready to restore the backup
-        return f"Ready to restore backup. File name: {restore_file_name}\n\n", 201
+        
+        # TODO: determine the table name from the backup file name best approach, 
+        # using db id or infering it directory from the avaro file
+        # for now quick and dirty approach
+        table_name = restore_file_name.split("_")[0]
+        
+        result = restore_backup(table_name, restore_file_name)
+        print(f"result: {result}")
+        return f"Backup restored. File name: {restore_file_name} - table name: {table_name}\n\n", 201
 
 @app.route("/backups-create", methods=['GET', 'POST'])
 def backup_create():
@@ -121,7 +130,7 @@ def backup_create():
         if table_name not in valid_tables:
             return "Invalid table name."
 
-        result = create_backup(table_name)        
+        result = create_backup(table_name)     
         print(f"result: {result}")
         return f"Backup created for Table name: {table_name}\n\n", 201
 

@@ -17,6 +17,12 @@ metadata = MetaData()
 
 BACKUPS_FOLDER = 'backups'
 
+# table names to model class mappings
+TABLES = {
+    'jobs': Job,
+    'departments': Department,
+    'hired_employees': HiredEmployee,
+}
 
 # Ensure the backups folder exists
 if not os.path.exists(BACKUPS_FOLDER):
@@ -42,25 +48,14 @@ def get_avro_type(sql_type):
 def create_backup(table_name):
     """
     Creates an Avro backup of a SQLAlchemy model's table.
-    :param model_class: SQLAlchemy model class
+    :param table_name: Name of the table to back up
     """
     try:
-        # addded table name to model mapping
-        # TODO: optimize this approach
-        if table_name == 'jobs':
-            model_class = Job
-        elif table_name == 'departments':
-            model_class = Department
-        elif table_name == 'hired_employees':
-            model_class = HiredEmployee
-        else:
-            raise ValueError(f"Unknown table name: {table_name}")
-        
+        model_class = TABLES[table_name]
         backup_file = f"{table_name}_{uuid.uuid4()}.avro"
-
         session = Session()
         rows = session.query(model_class).all()
-        # TODO: check when is better to close the session
+
         session.close()
 
         schema = {
@@ -87,7 +82,7 @@ def create_backup(table_name):
             'avro_file': backup_file
         }
         
-        # Create the insert statement
+        # log created backup action to database
         stmt = insert(BackupFile).values(**backup_data)
 
         # Execute the insert statement within a session
@@ -110,15 +105,16 @@ def create_backup(table_name):
             "error": str(e)
         }
         
-def restore_backup(backup_file, model_class):
+def restore_backup(table_name, backup_file):
     """
     Restores a table from an Avro backup file.
+
     Args:
-        backup_file (str): The path to the Avro backup file.
-        model_class (Base): The SQLAlchemy model class corresponding to the table to be restored.
+        table_name (str): The name of the table to restore.
+        backup_file (str): The name of the Avro backup file.
     """
     try:
-        table_name = model_class.__tablename__
+        # table_name = model_class.__tablename__
 
         with open(f"{BACKUPS_FOLDER}/{backup_file}", "rb") as f:
             avro_reader = fastavro.reader(f)
@@ -146,7 +142,7 @@ def restore_backup(backup_file, model_class):
         session.commit()
         session.close()
 
-        print(f"Backup '{backup_file}' restored to table '{table_name}'")
+        print(f"Backup file: '{backup_file}' restored to table '{table_name}'")
 
         # TODO: Add log in the database
         return {
@@ -162,9 +158,4 @@ def restore_backup(backup_file, model_class):
             "status": "error",
             "error": str(e)
         }
-
-# for debugging purposes
-# result = create_backup(Department)
-# result = create_backup(BackupFile)
-# result = restore_backup("backups_files_715885a3-9fd2-4fc8-89c6-7ea35c36194c.avro", BackupFile)
-# print(result)
+    # TODO: Add other exceptions. e.g integrity error due to existing primary key
