@@ -5,6 +5,7 @@ import uuid
 import fastavro
 from sqlalchemy import insert, MetaData, Column, Table
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql.sqltypes import Integer, String, DateTime, Boolean, Float, Numeric
 from datetime import datetime, timezone
 
@@ -91,15 +92,21 @@ def create_backup(table_name):
             session.commit()
             session.close()
             
-        return {
+        return True, {
             "action": "create_backup",
             "status": "success",
             "file_name": backup_file,
         }
     
+    except SQLAlchemyError as e:
+        # print(f"Error during commit: {e}")
+        return False, {
+            "action": "create_backup",
+            "status": "error",
+            "error": str(e)
+        }
     except Exception as e:
-        print(f"Error creating backup: {e}")
-        return {
+        return False, {
             "action": "create_backup",
             "status": "error",
             "error": str(e)
@@ -137,6 +144,9 @@ def restore_backup(table_name, backup_file):
             elif 'datetime' in record and isinstance(record['datetime'], datetime):
                 pass #already a datetime - don't modify
             
+            # print(f"{table.insert().values(record)}")
+            print(record)
+
             session.execute(table.insert().values(record))
 
         session.commit()
@@ -152,6 +162,12 @@ def restore_backup(table_name, backup_file):
             "table_name": table_name
         }
 
+    except SQLAlchemyError as e:
+        return False, {
+            "action": "restore_backup",
+            "status": "SQLAlchemyError",
+            "error": str(e)
+        }
     except Exception as e:
         print(f"Error restoring backup: {e}")
         return False, {
@@ -159,4 +175,3 @@ def restore_backup(table_name, backup_file):
             "status": "error",
             "error": str(e)
         }
-    # TODO: Add other exceptions. e.g integrity error due to existing primary key
