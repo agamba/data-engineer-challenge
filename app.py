@@ -3,21 +3,18 @@ from flask import Flask, jsonify, render_template, request
 import json
 import traceback
 
-# import custom functions
-from models import *
+from config import UPLOAD_FOLDER
+from models import initialize_db
 from csv_to_db import *
 from backups import create_backup, restore_backup
 
-
 app = Flask(__name__, template_folder='templates')
-# TODO: move to config file
-# Set the upload folder path (adjust as needed)
-UPLOAD_FOLDER = 'uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Ensure the upload folder exists
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+# Initialize the database
+initialize_db()
+
+# redundant
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route("/")
 def index():
