@@ -9,7 +9,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql.sqltypes import Integer, String, DateTime, Boolean, Float, Numeric
 from datetime import datetime, timezone
 
-
 # re use sqlAlchemy engine from models.py
 from models import engine, Job, Department, HiredEmployee, BackupFile
 
@@ -139,6 +138,7 @@ def restore_backup(table_name, backup_file):
 
         # Insert data into the table
         for record in data:
+            # Convert datetime format for compatibility
             if 'datetime' in record and isinstance(record['datetime'], int): # Check data type and if it exists
                 try:  # Try parsing without timezone info
                     record['datetime'] = datetime.fromtimestamp(record['datetime'] / 1000)

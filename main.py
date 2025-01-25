@@ -10,7 +10,7 @@ from backups import create_backup, restore_backup
 
 
 app = Flask(__name__, template_folder='templates')
-
+# TODO: move to config file
 # Set the upload folder path (adjust as needed)
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -108,8 +108,7 @@ def backup_restore():
             return "Please select a backup file to restore."
         
         # TODO: determine the table name from the backup file name best approach, 
-        # using db id or infering it directory from the avaro file
-        # for now quick and dirty approach
+        # extract from file name, e.g "hired_employees___1104e5c8-b133-4594-b231-31ab84a75fa8.avro"
         table_name = restore_file_name.split("___")[0]
 
         is_vallid, result = restore_backup(table_name, restore_file_name)
@@ -125,16 +124,19 @@ def backup_create():
         table_name = request.form.get('table_name')
         
         if table_name == "":
-            return "Please select a table to backup."
+            return "Must provide table_name to create backup.", 400
         
         # Perform simple validation
         valid_tables = ["hired_employees", "departments", "jobs"]
         if table_name not in valid_tables:
-            return "Invalid table name."
+            return "Invalid table name.", 400
 
-        result = create_backup(table_name)     
+        is_valid, result = create_backup(table_name)
+        if not is_valid:
+            return f"Error creating backup: {result}", 201
+        
         print(f"result: {result}")
-        return f"Backup created for Table name: {table_name}\n\n", 201
+        return f"Backup created for Table name: {table_name}\n\n{result}", 201
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
