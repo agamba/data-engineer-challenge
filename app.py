@@ -5,8 +5,8 @@ import traceback
 
 from config import UPLOAD_FOLDER
 from models import initialize_db
-from csv_to_db import *
-from backups import create_backup, restore_backup
+from csv_to_db import process_valid_invalid_results
+from backups import create_backup, restore_backup, get_backup_files
 
 app = Flask(__name__, template_folder='templates')
 
@@ -45,7 +45,8 @@ def get_import():
             # return redirect(request.url)
             return "Invalid data.\n\n", 400
 
-        print()
+        print("#######################")
+        print("Processing Import Request:")
         print("table_name: ", table_name)
         print("chunk_size: ", chunk_size)
         print("file: ", file.filename)
@@ -53,9 +54,9 @@ def get_import():
         # save submitted contents to a file
         if file:
             filename = file.filename.replace(" ", "_")
-            filename_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filename_path)
-            print(f'File uploaded successfully at: {filename_path}')
+            imported_file = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(imported_file)
+            print(f'File uploaded successfully at: {imported_file}')
 
             try:
                 chunk_size = int(chunk_size)  # Convert chunk_size to integer
@@ -67,17 +68,16 @@ def get_import():
             print(f"PARAMS:table_name: {table_name}, Chunk size: {chunk_size}")
 
         # Process data and get logs
-        logs_result, file_path = process_valid_invalid_results(filename_path, chunk_size, table_name)
+        logs_file_path = process_valid_invalid_results(imported_file, chunk_size, table_name)
         response = {
                 "table_name": table_name,
                 "chunk_size": chunk_size,
-                "filename_path":filename_path,
+                "imported_file":imported_file,
                 "message": "Data processed successfully.",
-                "logs_result": logs_result,
-                "logs_file_path": file_path
+                "logs_file_path": logs_file_path
         }
         print(response)
-        return "data processed successfully\n\n", 201
+        return f"data processed successfully, check logs for details: {logs_file_path}.\n\n", 201
         # return jsonify(response), 201
     else:
         # render the import page
@@ -112,7 +112,6 @@ def backup_restore():
         if not is_vallid:
             return f"Error restoring backup: {result}"
         
-        
         return f"Backup restored! File name: {restore_file_name} - table name: {table_name}\n\n{result}", 201
 
 @app.route("/backups-create", methods=['GET', 'POST'])
@@ -120,8 +119,9 @@ def backup_create():
     if request.method == 'POST':
         table_name = request.form.get('table_name')
         
+        # TODO: Check best error code for this case
         if table_name == "":
-            return "Must provide table_name to create backup.", 400
+            return "Must provide table_name to create backup.", 200
         
         # Perform simple validation
         valid_tables = ["hired_employees", "departments", "jobs"]

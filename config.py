@@ -2,7 +2,9 @@
 import os
 from dotenv import load_dotenv
 
-SHOW_CONSOLE_LOGS = True
+SHOW_CONSOLE_LOGS_IMPORT = True
+SHOW_CONSOLE_LOGS_API = True
+SHOW_CONSOLE_LOGS_REPORTS = True
 
 # TODO: Make this dynamic from DB models
 columns_names_by_table = {

@@ -172,3 +172,17 @@ def restore_backup(table_name, backup_file):
             "status": "error",
             "error": str(e)
         }
+
+def get_backup_files():
+    session = Session()
+    backup_files = session.query(BackupFile).all()
+    backups = []
+    for backup in backup_files:
+        record = {
+            "table_name": backup.table_name,
+            "datetime": backup.datetime,
+            "avro_file": backup.avro_file
+        }
+        backups.append(record)
+    session.close()
+    return backups
