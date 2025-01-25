@@ -51,19 +51,3 @@ def delete_all_tables():
 def delete_table(table_name):
     table = Base.metadata.tables[table_name]
     table.drop(engine)
-
-# TODO: Move this function to approppriate pipeline
-def get_backup_files():
-    session = Session()
-    backup_files = session.query(BackupFile).all()
-    backups = []
-    for backup in backup_files:
-        record = {
-            "table_name": backup.table_name,
-            "datetime": backup.datetime,
-            "avro_file": backup.avro_file
-
-        }
-        backups.append(record)
-    session.close()
-    return backups

@@ -1,32 +1,30 @@
-""" create and restore backups of the database in AVRO format """
+# backup.py
+""" Functmions for create and restore backups in AVRO format """
 import traceback
 import os
 import uuid
 import fastavro
-from sqlalchemy import insert, MetaData, Column, Table
+from sqlalchemy import insert, MetaData
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql.sqltypes import Integer, String, DateTime, Boolean, Float, Numeric
 from datetime import datetime, timezone
 
+from config import BACKUPS_FOLDER
 # re use sqlAlchemy engine from models.py
 from models import engine, Job, Department, HiredEmployee, BackupFile
 
 Session = sessionmaker(bind=engine)
 metadata = MetaData()
 
-BACKUPS_FOLDER = 'backups'
 
 # table names to model class mappings
+# TODO: need to optimize this to be dynamic
 TABLES = {
     'jobs': Job,
     'departments': Department,
     'hired_employees': HiredEmployee,
 }
-
-# Ensure the backups folder exists
-if not os.path.exists(BACKUPS_FOLDER):
-    os.makedirs(BACKUPS_FOLDER)
 
 def get_avro_type(sql_type):
     """

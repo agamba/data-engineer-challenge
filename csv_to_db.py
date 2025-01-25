@@ -8,7 +8,7 @@ import numpy as np
 import json
 
 from config import LOGS_FOLDER, SHOW_CONSOLE_LOGS, columns_names_by_table
-from models import Session, Department, Job, HiredEmployee, exc
+from models import Session, Department, Job, HiredEmployee, BackupFile, exc
 
 
 def load_csv_data(file_name, chunk_size, table_name):
@@ -329,11 +329,26 @@ def dump_json_to_file(data, table_name):
     print(f"An error occurred while encoding JSON: {e}")
     return False
 
+# TODO: Move this function to approppriate pipeline
+def get_backup_files():
+    session = Session()
+    backup_files = session.query(BackupFile).all()
+    backups = []
+    for backup in backup_files:
+        record = {
+            "table_name": backup.table_name,
+            "datetime": backup.datetime,
+            "avro_file": backup.avro_file
+
+        }
+        backups.append(record)
+    session.close()
+    return backups
+
+# TODO: move to tests
 # for degub only
 # file_name = "uploads/departments.csv"
 # file_name = "data/departments.csv"
 # chunk_size = 1000
 # table_name = "departments"
 # insert_logs, file_path = process_valid_invalid_results(file_name, chunk_size, table_name)
-
-

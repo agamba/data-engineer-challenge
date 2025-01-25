@@ -27,10 +27,12 @@ API_URL = 'http://127.0.0.1:8080'
 
 """define directories"""
 # used in import pipline
-UPLOAD_FOLDER = 'uploads'
-LOGS_FOLDER  = 'logs'
-# used in reports pipline
+UPLOAD_FOLDER = 'UPLOADS'
+LOGS_FOLDER  = 'LOGS'
+# used in reports and backup pipline
 RESULT_FOLDER = 'RESULTS'
+BACKUPS_FOLDER = 'BACKUPS'
+
 # create directores if not exist
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -38,4 +40,5 @@ if not os.path.exists(RESULT_FOLDER):
     os.makedirs(RESULT_FOLDER)
 if not os.path.exists(LOGS_FOLDER):
     os.makedirs(LOGS_FOLDER)
-
+if not os.path.exists(BACKUPS_FOLDER):
+    os.makedirs(BACKUPS_FOLDER)
