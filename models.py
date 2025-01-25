@@ -1,5 +1,5 @@
+# models.py
 import os
-
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text, text, exc
 from sqlalchemy.orm import sessionmaker, declarative_base
 from config import DATABASE_URI

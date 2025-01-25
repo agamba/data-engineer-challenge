@@ -1,6 +1,5 @@
-"""
-This module is responsible for importing and validating data from a CSV file into the database.
-"""
+# csv_to_db.py
+"""Define csv to db functions for importing, validating and inserting data into the database from a CSV file."""
 from datetime import timezone
 import datetime 
 import traceback
@@ -8,11 +7,9 @@ import pandas as pd
 import numpy as np
 import json
 
-# import db models
-from models import engine, Session, Department, Job, HiredEmployee, exc, columns_names_by_table
+from config import LOGS_FOLDER, SHOW_CONSOLE_LOGS, columns_names_by_table
+from models import Session, Department, Job, HiredEmployee, exc
 
-"""Define csv to db functions"""
-#################################
 
 def load_csv_data(file_name, chunk_size, table_name):
     columns_names = columns_names_by_table[table_name]
@@ -239,7 +236,7 @@ def insert_data_to_db(batches, table_name):
         # comit each batch to db
         session.commit()
 
-        # close db session and engine
+        # close db session
         session.close()
         # engine.dispose() # consider keeping connection open?
 
@@ -319,7 +316,7 @@ def dump_json_to_file(data, table_name):
   """
   try:
 
-    file_path = f"logs/{table_name}_{get_datetime_string()}.json"
+    file_path = f"{LOGS_FOLDER}/{table_name}_{get_datetime_string()}.json"
     # print("file_path: ", file_path)
 
     with open(file_path, 'w') as f:

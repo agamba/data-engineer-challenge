@@ -2,6 +2,8 @@
 import os
 from dotenv import load_dotenv
 
+SHOW_CONSOLE_LOGS = True
+
 # TODO: Make this dynamic from DB models
 columns_names_by_table = {
     "departments": ['id', 'department'],
@@ -20,8 +22,8 @@ password = os.getenv("MYSQL_PASSWORD")
 database = os.getenv("MYSQL_DATABASE")
 port = os.getenv("MYSQL_PORT")
 
-DATABASE_URI = "mysql+pymysql://{user}:{password}@{host}:{port}/{database}"
-API_URL = 'https://jsonplaceholder.typicode.com/posts'  # Example API
+DATABASE_URI = f"mysql+pymysql://{user}:{password}@{host}:{port}/{database}"
+API_URL = 'http://127.0.0.1:8080'
 
 """define directories"""
 # used in import pipline
