@@ -1,31 +1,23 @@
 import os
-from dotenv import load_dotenv
+
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text, text, exc
 from sqlalchemy.orm import sessionmaker, declarative_base
-
-# Load environment variables from .env file
-load_dotenv()
-
-columns_names_by_table = {
-    "departments": ['id', 'department'],
-    "jobs": ['id', 'job'],
-    "hired_employees": ['id', 'name', 'datetime', 'department_id', 'job_id']
-}
-
-"""Create a database engine using environment variables."""
-host = os.getenv("MYSQL_HOST")
-user = os.getenv("MYSQL_USER")
-password = os.getenv("MYSQL_PASSWORD")
-database = os.getenv("MYSQL_DATABASE")
-port = os.getenv("MYSQL_PORT")
-
-# Database connection
-engine = create_engine(f"mysql+pymysql://{user}:{password}@{host}:{port}/{database}")
+from config import DATABASE_URI
 
 # create base class
 Base = declarative_base()
-    
-# base tables
+
+# Create a database engine and session
+engine = create_engine(DATABASE_URI)
+Session = sessionmaker(bind=engine)
+# Evaluate when is better to start a new session
+# session = Session()
+
+# Initialize databas
+def initialize_db():
+    Base.metadata.create_all(engine)
+
+# Define db tables
 #####################
 class Department(Base):
     __tablename__ = 'departments'
@@ -53,12 +45,6 @@ class BackupFile(Base):
     datetime = Column(DateTime)
     avro_file = Column(String(255))
 
-# Create tables if do not exist
-Base.metadata.create_all(engine)
-
-# bind session to engine
-Session = sessionmaker(bind=engine)
-
 def delete_all_tables():
     Base.metadata.drop_all(engine)
 
@@ -66,6 +52,7 @@ def delete_table(table_name):
     table = Base.metadata.tables[table_name]
     table.drop(engine)
 
+# TODO: Move this function to approppriate pipeline
 def get_backup_files():
     session = Session()
     backup_files = session.query(BackupFile).all()
