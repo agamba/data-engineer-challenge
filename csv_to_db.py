@@ -1,14 +1,15 @@
 # csv_to_db.py
 """Define csv to db functions for importing, validating and inserting data into the database from a CSV file."""
-from datetime import timezone
-import datetime 
+from datetime import datetime
 import traceback
 import pandas as pd
 import numpy as np
 import json
+from sqlalchemy import insert
+import uuid
 
 from config import LOGS_FOLDER, SHOW_CONSOLE_LOGS_IMPORT, columns_names_by_table
-from models import Session, Department, Job, HiredEmployee, BackupFile, exc
+from models import Session, Department, Job, HiredEmployee, Transaction, exc
 
 def load_csv_data(file_name, chunk_size, table_name):
     columns_names = columns_names_by_table[table_name]
@@ -252,7 +253,6 @@ def insert_data_to_db(batches, table_name):
                 error_message = f"IntegrityError processing batch."
                 error_message += "Detailed error: " + str(e)
                 # error_message += f"\nTraceback:\n{traceback.format_exc()}" # for dev only
-                print(error_message)
 
                 # TODO: further evaluation is needed to determine the type of logging in this scenario
                 log_rejected = {
@@ -262,19 +262,29 @@ def insert_data_to_db(batches, table_name):
                     "total_invalid_records": len(batch[1]),
                     "invalid_data": invallid_df.to_dict(orient="records"),
                     "status": "rejected",
-                    "message": "Data in batch violates existing data integrity, e.g. duplicated primary key",
-                    "error": error_message
+                    "message": "Data in batch violates existing data integrity constraints.",
+                    "error_message": str(e._message()), 
+                    "error_params": str(e.params)
                 }
                 logs.append(log_rejected)
-
-        # close db session
-        session.close()
-        # engine.dispose() # consider keeping connection open? YES
 
         # save logs to json file for each request
         json_log_file  = dump_json_to_file(logs, table_name)
 
-        # TODO: add log metadata to database
+        # Add log metadata to database
+        transaction_data = {
+            'table_name': table_name,
+            'datetime': datetime.now(),
+            'json_log_file': json_log_file
+        }
+  
+        # Add transaction log event into database
+        stmt = insert(Transaction).values(**transaction_data)
+        session.execute(stmt)
+        session.commit()
+
+        # close db session
+        session.close()
         
         if SHOW_CONSOLE_LOGS_IMPORT:
             print(f"Logs saved successfuly at path: {json_log_file}")
@@ -283,7 +293,7 @@ def insert_data_to_db(batches, table_name):
     
     except Exception as e:
         session.rollback()
-        error_message = f"\n\n\nException Error processing batch. error for table: {table_name}. error: {e}"
+        error_message = f"\n\nException Error processing batch.\n\nerror: {e}"
         # error_message += f"\nTraceback:\n{traceback.format_exc()}" 
         print(error_message)
         return "no_log_file_created"
@@ -319,17 +329,18 @@ def process_valid_invalid_results(file_name, chunk_size, table_name):
         # TODO: return error message
         return None
 
-    # 3. insert valid into db and generate json log file 
+    # 3. insert valid data into db and generate json log file 
     import_log_json_file = insert_data_to_db(valid_invalid_array, table_name)
 
-    print("\n\nimport_log_json_file: ", import_log_json_file)
+    if SHOW_CONSOLE_LOGS_IMPORT:
+        print("\n\nimport_log_json_file: ", import_log_json_file)
     
     return import_log_json_file
 
 
 def get_datetime_string():
     """Generates a string representing the current time """
-    now = datetime.datetime.now()
+    now = datetime.now()
     return now.strftime('%Y-%m-%d_%H_%M_%S')
 
 def dump_json_to_file(data, table_name):
@@ -343,8 +354,7 @@ def dump_json_to_file(data, table_name):
     True if the JSON data was successfully dumped, False otherwise.
   """
   try:
-
-    file_path = f"{LOGS_FOLDER}/{table_name}_{get_datetime_string()}.json"
+    file_path = f"{LOGS_FOLDER}/{table_name}___{uuid.uuid4()}.json"
     # print("file_path: ", file_path)
 
     with open(file_path, 'w') as f:

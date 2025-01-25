@@ -45,6 +45,13 @@ class BackupFile(Base):
     datetime = Column(DateTime)
     avro_file = Column(String(255))
 
+class Transaction(Base):
+    __tablename__ = 'transactions'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    table_name = Column(String(255))
+    datetime = Column(DateTime)
+    json_log_file = Column(String(255))
+
 def delete_all_tables():
     Base.metadata.drop_all(engine)
 
