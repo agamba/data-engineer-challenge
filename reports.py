@@ -16,18 +16,16 @@ from models import engine
 """
 Challenge 2
 Requiment 1
-Number of employees hired for each job and department in 2021 divided by quarter. The table must be ordered alphabetically by department and job.
 """
 # TODO: 
 # employees hired for each
-# job and department in 2021 
+# job and department 
 # divided by quarter.
 
 
 """
 Challenge 2
 Requiment 2
-List of ids, name and number of employees hired of each department that hired more employees than the mean of employees hired in 2021 for all the departments, ordered by the number of employees hired (descending).
 """
 # TODO: 
 # join dep, job, hire
