@@ -244,7 +244,8 @@ def insert_data_to_db(batches, table_name):
                     "invalid_data": invallid_df.to_dict(orient="records"),
                     "status": "success",
                     "message": "Valid data in batch inserted into database.",
-                    "status": "",
+                    "timestamp": datetime.now().timestamp()
+                    
                 }
                 logs.append(result_log)
 
@@ -255,18 +256,19 @@ def insert_data_to_db(batches, table_name):
                 # error_message += f"\nTraceback:\n{traceback.format_exc()}" # for dev only
 
                 # TODO: further evaluation is needed to determine the type of logging in this scenario
-                log_rejected = {
+                result_log_rejected = {
                     "table_name": table_name,
                     "batch_number": batch_number,
                     "total_valid_records": len(batch[0]),
                     "total_invalid_records": len(batch[1]),
                     "invalid_data": invallid_df.to_dict(orient="records"),
                     "status": "rejected",
-                    "message": "Data in batch violates existing data integrity constraints.",
+                    "message": "Data in batch violates existing data integrity constraints",
+                    "timestamp": datetime.now().timestamp(),
                     "error_message": str(e._message()), 
                     "error_params": str(e.params)
                 }
-                logs.append(log_rejected)
+                logs.append(result_log_rejected)
 
         # save logs to json file for each request
         json_log_file  = dump_json_to_file(logs, table_name)
