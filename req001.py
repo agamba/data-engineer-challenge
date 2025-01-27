@@ -60,7 +60,7 @@ def hires_quarter(df, year=2021):
     # Pivot the table to have quarters as columns:
     hires_df = hires_group_dep_job_quarter.pivot_table(index=['department_id', 'job_id'], columns='quarter', values='employee_id', fill_value=0).reset_index()
 
-    ################ fix
+    ################ fixed
     # Ensure all four quarters are present:
     for quarter in range(1, 5):  # Check for quarters 1 through 4
         if quarter not in hires_df.columns:
@@ -72,9 +72,25 @@ def hires_quarter(df, year=2021):
     hires_df = hires_df[other_cols + sorted(quarter_cols)]
     ################
 
-    # Sort alphabetically:
     # TODO: check required order
     hires_df = hires_df.sort_values(['department_id', 'job_id'])
+
+    # Adjust data frame to requirement 
+    
+    # rename quarter columns to string values
+    hires_df.rename(columns={1: 'Q1', 2: 'Q2', 3: 'Q3', 4: 'Q4'}, inplace=True)
+
+    # join with departments and jobs to get the names
+    hires_df_dept_jobs = hires_df.merge(departments_df, on='department_id', how='left').merge(jobs_df, on='job_id', how='left') 
+
+    # Set a new column order 
+    new_order = ['department', 'job', 'department_id', 'job_id', 'Q1', 'Q2', 'Q3', 'Q4']
+
+    # Reorder the DataFrame
+    hires_df_dept_jobs = hires_df_dept_jobs[new_order]
+
+    # drop department_id and job_id columns
+    hires_df_dept_jobs.drop(['department_id', 'job_id'], axis=1, inplace=True)
 
     return hires_df
 
@@ -89,7 +105,9 @@ print()
 print("#" * 20)
 
 # test hires_quarter
-
 hires_quarter_df = hires_quarter(df)
 print(hires_quarter_df.head())
 print()
+
+
+# test 
