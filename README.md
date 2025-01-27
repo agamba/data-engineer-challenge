@@ -13,6 +13,16 @@ pip install -r requirements.txt
 python3 app.py
 ```
 
+Rename the file dot_env_sample to .env and fill in the values
+
+```
+MYSQL_HOST=
+MYSQL_DATABASE=
+MYSQL_USER=
+MYSQL_PASSWORD=
+MYSQL_PORT=3306
+```
+
 The app.py initializes
 
 ```
