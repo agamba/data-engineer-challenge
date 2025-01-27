@@ -94,8 +94,8 @@ def generate_visualizations(df, uuid_sess):
         plt.title('Top Hires per Department')
         plt.xlabel('Number of Hires')
         plt.ylabel('Department')
-        file_name = f'{RESULT_FOLDER}/{uuid_sess}___req_02_hires_dep_top.png'
-        plt.savefig(file_name, bbox_inches='tight', dpi=150)
+        file_name = f'{uuid_sess}___req_02_hires_dep_top.png'
+        plt.savefig(f"{RESULT_FOLDER}/{file_name}", bbox_inches='tight', dpi=150)
         # plt.show()
         images.append(file_name)
         print("Plot images geenrated !")
@@ -124,17 +124,18 @@ def process_requirement2(year=2021):
         images = generate_visualizations(result_df, uuid_sess)
 
         # save results to csv
-        report_csv_file = f'{RESULT_FOLDER}/{uuid_sess}__req_02_hires_dep_top.csv'
-        result_df.to_csv(report_csv_file, index=False)
+        report_csv_file = f'{uuid_sess}__req_02_hires_dep_top.csv'
+        result_df.to_csv(f"{RESULT_FOLDER}/{report_csv_file}", index=False)
 
         # save also an html version of the dataframe for the report
         result_html = result_df.to_html(index=False, classes='table table-striped table-bordered table-hover')
-        report_html_file = f'{RESULT_FOLDER}/{uuid_sess}__req_02_hires_dep_top.html'
-        with open(report_html_file, 'w') as f:
+        report_html_file = f'{uuid_sess}__req_02_hires_dep_top.html'
+        with open(f"{RESULT_FOLDER}/{report_html_file}", 'w') as f:
             f.write(result_html)
 
         result_dic = {
             "report_name": "req_02_hires_dep_top",
+            "session_id": uuid_sess,
             "datetime": datetime.now(),
             "html": report_html_file,
             "csv": report_csv_file,

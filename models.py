@@ -47,6 +47,7 @@ class Report(Base):
     __tablename__ = 'reports'
     id = Column(Integer, primary_key=True, autoincrement=True)
     report_name = Column(String(255))
+    session_id = Column(String(255))
     datetime = Column(DateTime)
     html = Column(String(255))
     csv = Column(String(255))

@@ -119,24 +119,23 @@ def generate_visualizations(df, uuid_sess):
     # Option 1: 
     # Heatmap (Good for overview)
     ##################
-    # generte image full path to image file name
-    image_name1 = f'{RESULT_FOLDER}/{uuid_sess}___req_01_hires_dep_job_quarter_heatmap.png'
-
+    # generte image file name
+    image_name1 = f'{uuid_sess}___req_01_hires_dep_job_quarter_heatmap.png'
     plt.figure(figsize=(15, 8))
     sns.heatmap(df.set_index(['department', 'job']), annot=True, cmap="YlGnBu", fmt=".0f", cbar_kws={'label': 'Number of Hires'})
     plt.title('Hires by Department, Job, and Quarter')
     # fixing saved image cropped
     plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels if needed
     plt.tight_layout()  # Adjust subplot parameters for padding
-    plt.savefig(image_name1, bbox_inches='tight', dpi=300) 
+    plt.savefig(f"{RESULT_FOLDER}/{image_name1}", bbox_inches='tight', dpi=300) 
     # plt.show() # Display the plot
     images.append(image_name1) # add image to list
 
     # Option 2
     # Grouped bar chart (comparing quarters and departments)
     ##################
-    
-    image_name2 = f'{RESULT_FOLDER}/{uuid_sess}___req_01_hires_dep_quarter_barchar.png'
+    # generte image file name
+    image_name2 = f'{uuid_sess}___req_01_hires_dep_quarter_barchar.png'
     plt.figure(figsize=(12, 10))
     sns.barplot(x='department', y='hires', hue='quarter', data=df_melted)
     plt.title('Hires by Department and Quarter')
@@ -145,7 +144,7 @@ def generate_visualizations(df, uuid_sess):
     plt.tight_layout()  # Adjust subplot parameters for padding
     plt.xlabel('Department')
     plt.ylabel('Number of Hires')
-    plt.savefig(image_name2, bbox_inches='tight', dpi=300)
+    plt.savefig(f"{RESULT_FOLDER}/{image_name2}", bbox_inches='tight', dpi=300)
     # plt.show()
     images.append(image_name2) # add image to list
 
@@ -183,17 +182,18 @@ def process_requirement1(year=2021):
         images = generate_visualizations(hires_df_dept_jobs, uuid_sess)
         
         # save results to csv
-        report_csv_file = f'{RESULT_FOLDER}/{uuid_sess}___req_01_hires_dep_job_quarter.csv'
-        hires_df_dept_jobs.to_csv(report_csv_file, index=False)
+        report_csv_file = f'{uuid_sess}___req_01_hires_dep_job_quarter.csv'
+        hires_df_dept_jobs.to_csv(f"{RESULT_FOLDER}/{report_csv_file}", index=False)
 
         # save also an html version of the dataframe for the report
         result_html = hires_df_dept_jobs.to_html(index=False, classes='table table-striped table-bordered table-hover')
-        report_html_file = f'{RESULT_FOLDER}/{uuid_sess}___req_01_hires_dep_job_quarter.html'
-        with open(report_html_file, 'w') as f:
+        report_html_file = f'{uuid_sess}___req_01_hires_dep_job_quarter.html'
+        with open(f"{RESULT_FOLDER}/{report_html_file}", 'w') as f:
             f.write(result_html)
 
         result_dic = {
             "report_name": "req_01_hires_dep_job_quarter",
+            "session_id": uuid_sess,
             "datetime": datetime.now(),
             "html": report_html_file,
             "csv": report_csv_file,
