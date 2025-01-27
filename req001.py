@@ -5,12 +5,13 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import os
 import uuid
+from sqlalchemy import insert
+from datetime import datetime, timezone
 
 from config import RESULT_FOLDER, columns_names_by_table
 # load models and engine from models.py
-from models import engine, Job, Department, HiredEmployee
+from models import engine, Session, Report
 
 def load_data():
     # load data from database
@@ -165,12 +166,11 @@ def process_requirement(year=2021):
 
     # loading data
     df, departments_df, jobs_df = load_data()
-    print(df.head())
-    print(departments_df.head())
-    print(jobs_df.head())
-    print()
-
-    print("#" * 20)
+    # print(df.head())
+    # print(departments_df.head())
+    # print(jobs_df.head())
+    # print()
+    # print("#" * 20)
 
     # test hires_quarter
     hires_df_dept_jobs = hires_quarter(df, departments_df, jobs_df, year)
@@ -182,8 +182,8 @@ def process_requirement(year=2021):
         images = generate_visualizations(hires_df_dept_jobs, uuid_sess)
         
         # save results to csv
-        report_csv = f'{RESULT_FOLDER}/{uuid_sess}___req_01_hires_dep_job_quarter.csv'
-        hires_df_dept_jobs.to_csv(report_csv, index=False)
+        report_csv_file = f'{RESULT_FOLDER}/{uuid_sess}___req_01_hires_dep_job_quarter.csv'
+        hires_df_dept_jobs.to_csv(report_csv_file, index=False)
 
         # save also an html version of the dataframe for the report
         result_html = hires_df_dept_jobs.to_html(index=False, classes='table table-striped table-bordered table-hover')
@@ -193,13 +193,24 @@ def process_requirement(year=2021):
 
         result_dic = {
             "report_name": "req_01_hires_dep_job_quarter",
+            "datetime": datetime.now(),
             "html": report_html_file,
-            "csv": report_csv,
-            "images": images
+            "csv": report_csv_file,
+            "images": ",".join(images) # return images as s string separated by commas
         }
+
+        # log created results to database
+        stmt = insert(Report).values(**result_dic)
+
+        # Execute the insert statement within a unique session
+        with Session() as session:
+            session.execute(stmt)
+            session.commit()
+            session.close()
+
         return result_dic
     else:
         return None
 
-results = process_requirement(year=2021)
-print(results)
+# results = process_requirement(year=2021)
+# print(results)

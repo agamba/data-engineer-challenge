@@ -43,6 +43,15 @@ class Transaction(Base):
     datetime = Column(DateTime)
     json_log_file = Column(String(255))
 
+class Report(Base):
+    __tablename__ = 'reports'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    report_name = Column(String(255))
+    datetime = Column(DateTime)
+    html = Column(String(255))
+    csv = Column(String(255))
+    images = Column(String(255))
+
 def delete_all_tables():
     Base.metadata.drop_all(engine)
 
