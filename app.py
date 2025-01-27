@@ -4,7 +4,7 @@ import json
 import traceback
 import mimetypes
 
-from config import RESULT_FOLDER
+from config import RESULT_FOLDER, UPLOAD_FOLDER
 from models import initialize_db
 from csv_to_db import process_valid_invalid_results, get_table_counts
 from backups import create_backup, restore_backup, get_backup_files
@@ -86,7 +86,7 @@ def get_import():
         # save submitted contents to a file
         if file:
             filename = file.filename.replace(" ", "_")
-            imported_file = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            imported_file = os.path.join(UPLOAD_FOLDER, filename)
             file.save(imported_file)
             print(f'File uploaded successfully at: {imported_file}')
 
