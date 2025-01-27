@@ -9,7 +9,17 @@ from sqlalchemy import insert
 import uuid
 
 from config import LOGS_FOLDER, SHOW_CONSOLE_LOGS_IMPORT, columns_names_by_table
-from models import Session, Department, Job, HiredEmployee, Transaction, exc
+from models import engine, Session, Department, Job, HiredEmployee, Transaction, exc
+
+def get_table_counts():
+    query = """SELECT 
+    (SELECT COUNT(*) FROM hired_employees) AS 'Total Hired Employees',
+    (SELECT COUNT(*) FROM departments) AS 'Total Departments',
+    (SELECT COUNT(*) FROM jobs) AS 'Total Jobs';"""
+    result = pd.read_sql_query(query, engine)
+    html = result.to_html(index=False)
+    print(html)
+    return html
 
 def load_csv_data(file_name, chunk_size, table_name):
     columns_names = columns_names_by_table[table_name]
@@ -368,4 +378,3 @@ def dump_json_to_file(data, table_name):
   except json.JSONEncoder as e:
     print(f"An error occurred while encoding JSON: {e}")
     return False
-
