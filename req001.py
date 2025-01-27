@@ -33,7 +33,7 @@ def load_data():
     return df, departments_df, jobs_df
 
 
-def hires_quarter(df, year=2021):
+def hires_quarter(df, departments_df, jobs_df, year=2021):
     """
     Calculates the number of employees hired per department and job for each quarter in a year.
     Ensures all four quarters are present in the output, even if no hires occurred.
@@ -72,7 +72,7 @@ def hires_quarter(df, year=2021):
     hires_df = hires_df[other_cols + sorted(quarter_cols)]
     ################
 
-    # TODO: check required order
+    # TODO: doube check required order
     hires_df = hires_df.sort_values(['department_id', 'job_id'])
 
     # Adjust data frame to requirement 
@@ -95,7 +95,7 @@ def hires_quarter(df, year=2021):
     return hires_df_dept_jobs
 
 
-def generate_visualizations(df, my_uuid):
+def generate_visualizations(df, uuid_sess):
     """ 
     Geneate a plot for the report using seaborn
     can be computationally expensive for large datasets. 
@@ -104,18 +104,6 @@ def generate_visualizations(df, my_uuid):
         df (pd.DataFrame): DataFrame with the data to plot
     Returns:
     """
-    # sample data
-    # data = {'department_id': range(1, 13), 
-    #         'job_id': range(1, 13),
-    #         'Q1': [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #         'Q2': [0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
-    #         'Q3': [0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
-    #         'Q4': [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1]}
-
-    # print(data)
-
-    # df = pd.DataFrame(data)
-
     # Initialize lists to store generated plot images
     images = []
 
@@ -125,12 +113,12 @@ def generate_visualizations(df, my_uuid):
     # Convert quarter to string (for categorical plotting)
     df_melted['quarter'] = df_melted['quarter'].astype(str)
 
-    
+    print("Generating plot images ...")
     # Option 1: 
     # Heatmap (Good for overview)
     ##################
     # generte image full path to image file name
-    image_name1 = f'{RESULT_FOLDER}/req_01_hires_dep_job_quarter_heatmap___{my_uuid}.png'
+    image_name1 = f'{RESULT_FOLDER}/{uuid_sess}___req_01_hires_dep_job_quarter_heatmap.png'
 
     plt.figure(figsize=(15, 8))
     sns.heatmap(df.set_index(['department', 'job']), annot=True, cmap="YlGnBu", fmt=".0f", cbar_kws={'label': 'Number of Hires'})
@@ -146,7 +134,7 @@ def generate_visualizations(df, my_uuid):
     # Grouped bar chart (comparing quarters and departments)
     ##################
     
-    image_name2 = f'{RESULT_FOLDER}/req_01_hires_dep_quarter_barchar___{my_uuid}.png'
+    image_name2 = f'{RESULT_FOLDER}/{uuid_sess}___req_01_hires_dep_quarter_barchar.png'
     plt.figure(figsize=(12, 10))
     sns.barplot(x='department', y='hires', hue='quarter', data=df_melted)
     plt.title('Hires by Department and Quarter')
@@ -159,29 +147,59 @@ def generate_visualizations(df, my_uuid):
     # plt.show()
     images.append(image_name2) # add image to list
 
+    print("Plot images geenrated !")
+
     return images
 
+def process_requirement(year=2021):
+    """ 
+    Process the requirement 1
+    Arguements:
+        year (int): year to process
+    Returns:
+        result_dic (dic): Dictionary with the results
+    """
 
-# create unique id for session
-uuid_sess = "" + str(uuid.uuid4())
+    # create unique id for session
+    uuid_sess = "" + str(uuid.uuid4())
 
+    # loading data
+    df, departments_df, jobs_df = load_data()
+    print(df.head())
+    print(departments_df.head())
+    print(jobs_df.head())
+    print()
 
-# test loading data
-df, departments_df, jobs_df = load_data()
-print(df.head())
-print(departments_df.head())
-print(jobs_df.head())
-print()
+    print("#" * 20)
 
-print("#" * 20)
+    # test hires_quarter
+    hires_df_dept_jobs = hires_quarter(df, departments_df, jobs_df, year)
+    print(hires_df_dept_jobs.head())
+    
 
-# test hires_quarter
-hires_df_dept_jobs = hires_quarter(df)
-print(hires_df_dept_jobs.head())
-print()
+    if hires_df_dept_jobs is not None:
+        # generate plot images
+        images = generate_visualizations(hires_df_dept_jobs, uuid_sess)
+        
+        # save results to csv
+        report_csv = f'{RESULT_FOLDER}/{uuid_sess}___req_01_hires_dep_job_quarter.csv'
+        hires_df_dept_jobs.to_csv(report_csv, index=False)
 
+        # save also an html version of the dataframe for the report
+        result_html = hires_df_dept_jobs.to_html(index=False, classes='table table-striped table-bordered table-hover')
+        report_html_file = f'{RESULT_FOLDER}/{uuid_sess}___req_01_hires_dep_job_quarter.html'
+        with open(report_html_file, 'w') as f:
+            f.write(result_html)
 
-# test generate_visualizations
-images = generate_visualizations(hires_df_dept_jobs, uuid_sess)
-print(images)
-print()
+        result_dic = {
+            "report_name": "req_01_hires_dep_job_quarter",
+            "html": report_html_file,
+            "csv": report_csv,
+            "images": images
+        }
+        return result_dic
+    else:
+        return None
+
+results = process_requirement(year=2021)
+print(results)
