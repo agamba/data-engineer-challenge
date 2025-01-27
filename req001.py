@@ -92,7 +92,78 @@ def hires_quarter(df, year=2021):
     # drop department_id and job_id columns
     hires_df_dept_jobs.drop(['department_id', 'job_id'], axis=1, inplace=True)
 
-    return hires_df
+    return hires_df_dept_jobs
+
+
+def generate_visualizations(df, my_uuid):
+    """ 
+    Geneate a plot for the report using seaborn
+    can be computationally expensive for large datasets. 
+    TODO: consider other options. e.g, chart.js for web reports
+    Args:
+        df (pd.DataFrame): DataFrame with the data to plot
+    Returns:
+    """
+    # sample data
+    # data = {'department_id': range(1, 13), 
+    #         'job_id': range(1, 13),
+    #         'Q1': [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    #         'Q2': [0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+    #         'Q3': [0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+    #         'Q4': [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1]}
+
+    # print(data)
+
+    # df = pd.DataFrame(data)
+
+    # Initialize lists to store generated plot images
+    images = []
+
+    # Melt the DataFrame to make it suitable for seaborn
+    df_melted = df.melt(id_vars=['department', 'job'], var_name='quarter', value_name='hires')
+
+    # Convert quarter to string (for categorical plotting)
+    df_melted['quarter'] = df_melted['quarter'].astype(str)
+
+    
+    # Option 1: 
+    # Heatmap (Good for overview)
+    ##################
+    # generte image full path to image file name
+    image_name1 = f'{RESULT_FOLDER}/req_01_hires_dep_job_quarter_heatmap___{my_uuid}.png'
+
+    plt.figure(figsize=(15, 8))
+    sns.heatmap(df.set_index(['department', 'job']), annot=True, cmap="YlGnBu", fmt=".0f", cbar_kws={'label': 'Number of Hires'})
+    plt.title('Hires by Department, Job, and Quarter')
+    # fixing saved image cropped
+    plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels if needed
+    plt.tight_layout()  # Adjust subplot parameters for padding
+    plt.savefig(image_name1, bbox_inches='tight', dpi=300) 
+    # plt.show() # Display the plot
+    images.append(image_name1) # add image to list
+
+    # Option 2
+    # Grouped bar chart (comparing quarters and departments)
+    ##################
+    
+    image_name2 = f'{RESULT_FOLDER}/req_01_hires_dep_quarter_barchar___{my_uuid}.png'
+    plt.figure(figsize=(12, 10))
+    sns.barplot(x='department', y='hires', hue='quarter', data=df_melted)
+    plt.title('Hires by Department and Quarter')
+    # fixing saved image cropped
+    plt.xticks(rotation=45, ha='right') # rotate x-axis labels if needed
+    plt.tight_layout()  # Adjust subplot parameters for padding
+    plt.xlabel('Department')
+    plt.ylabel('Number of Hires')
+    plt.savefig(image_name2, bbox_inches='tight', dpi=300)
+    # plt.show()
+    images.append(image_name2) # add image to list
+
+    return images
+
+
+# create unique id for session
+uuid_sess = "" + str(uuid.uuid4())
 
 
 # test loading data
@@ -105,9 +176,12 @@ print()
 print("#" * 20)
 
 # test hires_quarter
-hires_quarter_df = hires_quarter(df)
-print(hires_quarter_df.head())
+hires_df_dept_jobs = hires_quarter(df)
+print(hires_df_dept_jobs.head())
 print()
 
 
-# test 
+# test generate_visualizations
+images = generate_visualizations(hires_df_dept_jobs, uuid_sess)
+print(images)
+print()
