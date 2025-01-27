@@ -17,6 +17,10 @@ app = Flask(__name__, template_folder='templates')
 # Initialize the database
 initialize_db()
 
+# TODO: securuty considerations/options (not implemented yet)
+# use simple API key 
+# use environment variable for API key
+# use authentication mechansim in cloud enironment
 
 # HOME
 @app.route("/")
