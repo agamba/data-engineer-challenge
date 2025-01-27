@@ -31,6 +31,9 @@ Press CTRL+C to quit
 - All actions in the API are available via web interface
 
 <img src="docs/api_home_web.png" alt="Home" height="200">
+<img src="docs/import_data_api.png" alt="Import" height="200">
+<img src="docs/backups.png" alt="Backups" height="200">
+<img src="docs/dashboard.png" alt="Daskboard" height="200">
 
 ### Import API via CURL
 
