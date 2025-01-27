@@ -8,6 +8,9 @@ from models import initialize_db, session
 from csv_to_db import process_valid_invalid_results
 from backups import create_backup, restore_backup, get_backup_files
 
+from req001 import process_requirement1
+from req002 import process_requirement2
+
 app = Flask(__name__, template_folder='templates')
 
 # Initialize the database
@@ -23,12 +26,19 @@ def index():
 # DASHBOARD
 @app.route("/dashboard")
 def dashboard():
-    # 
-    return render_template('dashboard.html')
+    # Generate reports for each requirement and pass to the template
+
+    results1 = process_requirement1(year=2021)
+    print(results1)
+
+    results2 = process_requirement2(year=2021)
+    print(results2)
+
+    return render_template('dashboard.html', results1=results1, results2=results2)
 
 
 # IMPORT CSV DATA
-# Adjusted theto recieved data both from  web page demo and CURL
+# Adjusted to recieved data both from  web page demo and CURL
 # e.g. curl -X POST -F "file=@data/departments.csv" -F "table_name=departments" -F "chunk_size=1000" http://127.0.0.1:8080/import
 @app.route("/import", methods=['GET', 'POST'])
 def get_import():

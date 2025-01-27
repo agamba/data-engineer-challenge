@@ -17,5 +17,5 @@ print(results)
 Challenge 2
 Requiment 2
 """
-results = process_requirement2()
+results = process_requirement2(year=2021)
 print(results)

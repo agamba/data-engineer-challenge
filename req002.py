@@ -9,7 +9,7 @@ import uuid
 from sqlalchemy import insert
 from datetime import datetime, timezone
 
-from config import RESULT_FOLDER, columns_names_by_table
+from config import RESULT_FOLDER
 # load models and engine from models.py
 from models import engine, Session, Report
 
@@ -33,7 +33,7 @@ def load_data():
 
     return df, departments_df, jobs_df
 
-def high_performing_departments(hired_employees_df, departments_df):
+def high_performing_departments(hired_employees_df, departments_df, year=2021):
     """
     Identifies departments that hired more employees than the 2021 average.
 
@@ -48,7 +48,7 @@ def high_performing_departments(hired_employees_df, departments_df):
     try:
         # Filter hires to 2021
         hired_employees_2021 = hired_employees_df[
-            hired_employees_df['datetime'].dt.year == 2021
+            hired_employees_df['datetime'].dt.year == year
         ]
 
         # Calculate hires per department in 2021
@@ -105,7 +105,7 @@ def generate_visualizations(df, uuid_sess):
     except Exception as e:
         print(f"An error occurred in generate_visualizations(): {e}")        
 
-def process_requirement2():
+def process_requirement2(year=2021):
     # create unique id for session
     uuid_sess = "" + str(uuid.uuid4())
 
@@ -116,7 +116,7 @@ def process_requirement2():
     sql_query = f"SELECT * FROM departments"
     departments_df = pd.read_sql(sql_query, engine)
 
-    result_df = high_performing_departments(hired_employees_df, departments_df)
+    result_df = high_performing_departments(hired_employees_df, departments_df, year)
 
     if result_df is not None:
 

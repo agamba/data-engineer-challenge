@@ -9,7 +9,7 @@ import uuid
 from sqlalchemy import insert
 from datetime import datetime, timezone
 
-from config import RESULT_FOLDER, columns_names_by_table
+from config import RESULT_FOLDER
 # load models and engine from models.py
 from models import engine, Session, Report
 
