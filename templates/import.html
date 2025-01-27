@@ -23,14 +23,6 @@
       <input type="text" name="chunk_size" value="1000" size="4" /><br /><br />
 
       <input type="submit" value="Import" />
-
-      <h2>cURL Examples:</h2>
-
-      <pre><code>
-          curl -X POST -F "file=@data/departments.csv" \
-          -F "table_name=departments" \
-          -F "chunk_size=1000" http://127.0.0.1:8080/
-      </code></pre>
     </form>
   </body>
 </html>

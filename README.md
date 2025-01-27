@@ -1,55 +1,76 @@
 # Data Engineer Challenge
 
-- Migrate data from CSV files to a new database
-- csv files: hired_employees, jobs, departments
+This repository contains the implementation for the data engineer challenge.
 
-## Challenge 1
+## Installation
 
-1. Move data from files in CSV format to the new database.
-2. Create a Rest API service to receive new data. This service must have:
-   \
-    2.1. Each new transaction must fit the data dictionary rules.
-   \  
-    2.2. Be able to insert batch transactions (1 up to 1000 rows) with one request.
-   \
-    2.3. Receive the data for each table in the same service.
-   \
-    2.4. Keep in mind the data rules for each table.
-   \
-3. Create a feature to backup for each table and save it in the file system in AVRO format.
-4. Create a feature to restore a certain table with its backup.
+```
+git clone this repo
+cd data-engineer-challenge
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python3 app.py
+```
 
-## Challenge 2
+The app.py initializes
 
-- "Number of employees hired for each job and department in 2021 divided by quarter. The
-  table must be ordered alphabetically by department and job."
+```
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://192.168.0.4:8080
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 315-947-788
+```
 
-- Add dashboard to visualize data
-- Make abailable stakeholders' metrics/reports
-- Use existing libs or create my own for visualization?
+## Web Interface
 
-# Project structure (Plan)
+- The API is available at http://127.0.0.1:8080/ (adjust to your ip address)
+- All actions in the API are available via web interface
 
-├── models.py # Database models (SQLAlchemy)
-\
-├── csv_to_db.py # CSV and validation functionality
-\
-├── main.py # create API
-\
-├── requirements.txt # Python dependencies
-\
-├── .gitignore # Files to ignore in git
-\
-├── README.md # Project documentation
-\
-├── data # Directory for sample data
-\
-├── uploads # Directory for data uploaded by users
-\
-├── logs # Directory for json logs
-\
+<img src="docs/api_home_web.png" alt="Home" height="200">
 
-# Development plan - Todo App Code
+### Import API via CURL
+
+```
+curl -X POST -F "file=@data/departments.csv" \
+-F "table_name=departments" \
+-F "chunk_size=1000" http://YOUR_SERVER_IP:8080/import
+
+curl -X POST -F "file=@data/jobs.csv" \
+-F "table_name=jobs" \
+-F "chunk_size=1000" http://YOUR_SERVER_IP:8080/import
+
+curl -X POST -F "file=@data/hired_employees.csv" \
+-F "table_name=hired_employees" \
+-F "chunk_size=1000" http://YOUR_SERVER_IP:8080/import
+```
+
+### Create/Restore Backupd via CURL
+
+```
+curl -X POST \
+-F "restore_file_name=departments___d51850d6-0974-4563-80d9-4f437fecd8b6.avro" \
+http://127.0.0.1:8080/backups-restore
+
+curl -X POST \
+-F "table_name=departments" \
+http://127.0.0.1:8080/backups-create
+```
+
+## (Optional) Use Docker to create and and deploy image
+
+```
+# Build docker image locally from current dir
+docker build -t data-engineer-challenge .
+
+#run local image
+docker run -p 8080:8080 data-engineer-challenge
+```
+
+## Development plan
 
 \
 [X] Set up github repo
@@ -70,30 +91,23 @@
 \
 [X] Implement Backup Create and Restore functionality
 \
-[ ] Add Backup Create and Restore to UI
+[X] Add Backup Create and Restore to UI
 \
-[ ] Implement Reports for requirements
+[X] Implement Reports for requirements
 \
-[ ] Implement Reports using ploty and chart.js
+[X] Isolate db credentials (.env)
 \
-[ ] Isolate db credentials (.env or other method? clound based?)
-\
-[X] Evaluate best practice for logging failed transactions
+[X] Implement logging transactions (success/failure) in DB
 \
 [X] Log transactions in json file in logs folder
-\
-[ ] Implement securuty, e.g. required API_KEY
 
-# Considerations
+## Sample Data Results
 
-- Consider performance implications in validation
-- focus on app logic localy first
-- Implement configuration for db type (e.g. mysql, postgress, other)? out of scope for now
+<img src="docs/sample_req1.png" alt="Report 1" height="200">
+<img src="docs/sample_req12png" alt="Report 2" height="200">
 
-# Validation cases:
+## Sample plot images
 
-- number of columns
-- null and empty values
-- is a valid ISO date
-- department_id exists in departments table
-- job_id exists in jobs table
+<img src="docs/sample___req_01_hires_dep_job_quarter_heatmap.png" alt="Heatmap Plot" height="200">
+<img src="docs/sample___req_01_hires_dep_quarter_barchar.png" alt="Barchart Plot" height="200">
+<img src="docs/sample___req_02_hires_dep_top.png" alt="Top Hires plot" height="200">

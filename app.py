@@ -125,8 +125,6 @@ def backup_page():
 
 @app.route("/backups-restore", methods=['GET', 'POST'])
 def backup_restore():
-    # TODO: Implement the logic restore backup
-    # TODO: determine the table name from the backup file name
     restore_file_name = request.form.get('restore_file_name')
     print(f"restore_file_name: {restore_file_name}")
     if request.method == 'POST':
@@ -138,7 +136,10 @@ def backup_restore():
         
         # TODO: determine the table name from the backup file name best approach, 
         # extract from file name, e.g "hired_employees___1104e5c8-b133-4594-b231-31ab84a75fa8.avro"
-        table_name = restore_file_name.split("___")[0]
+        try:
+            table_name = restore_file_name.split("___")[0]
+        except:
+            return "Invalid backup file name.", 400
 
         is_vallid, result = restore_backup(table_name, restore_file_name)
         if not is_vallid:
