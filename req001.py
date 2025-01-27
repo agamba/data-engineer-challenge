@@ -101,6 +101,7 @@ def generate_visualizations(df, uuid_sess):
     Geneate a plot for the report using seaborn
     can be computationally expensive for large datasets. 
     TODO: consider other options. e.g, chart.js for web reports
+    TODO: add try except to handle errors
     Args:
         df (pd.DataFrame): DataFrame with the data to plot
     Returns:
@@ -152,7 +153,7 @@ def generate_visualizations(df, uuid_sess):
 
     return images
 
-def process_requirement(year=2021):
+def process_requirement1(year=2021):
     """ 
     Process the requirement 1
     Arguements:

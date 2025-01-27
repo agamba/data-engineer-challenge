@@ -1,18 +1,21 @@
 # reports.py
-from req001 import process_requirement
-from models import Report
+
+# for clarity, separated functions for each requirement
+from req001 import process_requirement1
+from req002 import process_requirement2
+
+# TODO: remove this file and call this directory into Flask app
+# create a new session
 """
 Challenge 2
 Requiment 1
 """
-results = process_requirement(year=2021)
+results = process_requirement1(year=2021)
 print(results)
-
 
 """
 Challenge 2
 Requiment 2
 """
-# TODO: 
-# join dep, job, hire
-# order
+results = process_requirement2()
+print(results)
