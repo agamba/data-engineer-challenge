@@ -1,10 +1,11 @@
 import os
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_from_directory, abort
 import json
 import traceback
+import mimetypes
 
-from config import UPLOAD_FOLDER, DATABASE_URI,API_URL
-from models import initialize_db, session
+from config import RESULT_FOLDER
+from models import initialize_db
 from csv_to_db import process_valid_invalid_results
 from backups import create_backup, restore_backup, get_backup_files
 
@@ -33,6 +34,8 @@ def dashboard():
 
     results2 = process_requirement2(year=2021)
     print(results2)
+
+    # TODO: format results for display
 
     return render_template('dashboard.html', results1=results1, results2=results2)
 
@@ -145,6 +148,38 @@ def backup_create():
         
         print(f"result: {result}")
         return f"Backup created for Table name: {table_name}\n\n{result}", 201
+
+
+@app.route('/serve/<path:filename>')
+def serve_file(filename):
+    """
+    Serves a file from the specified directory.
+
+    Args:
+        filename: The path to the file within the FILE_DIRECTORY.  This should *not* include FILE_DIRECTORY itself.
+
+    Returns:
+        Flask Response: The file, or an error response if the file is not found or inaccessible.
+    """
+    filepath = os.path.join(RESULT_FOLDER, filename)
+
+    # Security check: Ensure the file is within the designated directory
+    if not filepath.startswith(RESULT_FOLDER):
+        abort(403, description="Forbidden: Attempted access outside allowed directory.")  # Forbidden
+
+    if not os.path.exists(filepath):
+        abort(404, description=f"File not found: {filename}") # File not found
+
+    # Determine the content type of the file
+    content_type = mimetypes.guess_type(filepath)[0]
+    if content_type is None:
+      content_type = "application/octet-stream"  # Default content type if unknown
+
+
+    try:
+        return send_from_directory(RESULT_FOLDER, filename, mimetype=content_type)
+    except Exception as e:
+        abort(500, description=f"Internal Server Error: {e}") # Internal server error
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
