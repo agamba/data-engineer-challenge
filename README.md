@@ -104,7 +104,7 @@ docker run -p 8080:8080 data-engineer-challenge
 ## Sample Data Results
 
 <img src="docs/sample_req1.png" alt="Report 1" height="200">
-<img src="docs/sample_req12png" alt="Report 2" height="200">
+<img src="docs/sample_req2.png" alt="Report 2" height="200">
 
 ## Sample plot images
 
