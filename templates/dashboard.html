@@ -13,14 +13,56 @@
     <h1>Dashboard</h1>
 
     <h2>Total Records per table</h2>
+    {{ table_counts | safe }}
 
     <h2>Report 1</h2>
-
-    <code>{{ results1 | default('N/A') }}</code>
-    <p></p>
+    Log: <code>{{ results1 | default('N/A') }}</code>
+    </hr>
+    <div>
+      <img
+        src="/serve/{{ results1.image1 | default('N/A') }}"
+        alt="Plot Heatmap"
+        width="90%"
+      />
+      <img
+        src="/serve/{{ results1.image2 | default('N/A') }}"
+        alt="Plot Barchar"
+        width="90%"
+      />
+      <br />
+      Download CSV:
+      <a href="/serve/{{ results1.csv | default('N/A') }}" target="data">
+        {{ results1.csv | default('N/A') }}
+      </a>
+      <br /><br />
+      Download HTML:
+      <a href="/serve/{{ results1.html | default('N/A') }}" target="data">
+        {{ results1.html | default('N/A') }}
+      </a>
+      <br />
+    </div>
 
     <h2>Report 2</h2>
-    <code>{{ results2 | default('N/A') }}</code>
+    Log: <code>{{ results2 | default('N/A') }}</code>
+    </hr>
+    <div>
+      <img
+        src="/serve/{{ results2.image1 | default('N/A') }}"
+        alt="Plot Barchar"
+        width="90%"
+      />
+      <br />
+      Download CSV:
+      <a href="/serve/{{ results2.csv | default('N/A') }}" target="data">
+        {{ results1.csv | default('N/A') }}
+      </a>
+      <br /><br />
+      Download HTML:
+      <a href="/serve/{{ results2.html | default('N/A') }}" target="data">
+        {{ results1.html | default('N/A') }}
+      </a>
+      <br />
+    </div>
     <p></p>
   </body>
 </html>

@@ -6,7 +6,7 @@ import mimetypes
 
 from config import RESULT_FOLDER
 from models import initialize_db
-from csv_to_db import process_valid_invalid_results
+from csv_to_db import process_valid_invalid_results, get_table_counts
 from backups import create_backup, restore_backup, get_backup_files
 
 from req001 import process_requirement1
@@ -30,14 +30,28 @@ def dashboard():
     # Generate reports for each requirement and pass to the template
 
     results1 = process_requirement1(year=2021)
-    print(results1)
-
     results2 = process_requirement2(year=2021)
-    print(results2)
+    
+    # TODO: Further consideration needed for rendering result data in the template
 
-    # TODO: format results for display
+    # Format results for display in template
+    req1_dict = {
+        "report_name": results1["report_name"],
+        "html": results1["html"],
+        "csv": results1["csv"],
+        "image1": results1["images"].split(",")[0],
+        "image2": results1["images"].split(",")[1],
+    }
 
-    return render_template('dashboard.html', results1=results1, results2=results2)
+    req2_dict = {
+        "report_name": results2["report_name"],
+        "html": results2["html"],
+        "csv": results2["csv"],
+        "image1": results2["images"], # Assuming there is only one image for req2
+    }
+    table_counts = get_table_counts()
+
+    return render_template('dashboard.html', table_counts=table_counts, results1=req1_dict, results2=req2_dict)
 
 
 # IMPORT CSV DATA

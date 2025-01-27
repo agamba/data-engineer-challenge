@@ -18,7 +18,6 @@ def get_table_counts():
     (SELECT COUNT(*) FROM jobs) AS 'Total Jobs';"""
     result = pd.read_sql_query(query, engine)
     html = result.to_html(index=False)
-    print(html)
     return html
 
 def load_csv_data(file_name, chunk_size, table_name):
