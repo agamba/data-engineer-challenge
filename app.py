@@ -13,21 +13,22 @@ app = Flask(__name__, template_folder='templates')
 # Initialize the database
 initialize_db()
 
-# redundant
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# HOME
 @app.route("/")
 def index():
     return render_template('index.html')
 
+
+# DASHBOARD
 @app.route("/dashboard")
 def dashboard():
+    # 
     return render_template('dashboard.html')
 
-def index():
-    return render_template('index.html')
 
-# Adjust code to recieved data also from web page demo
+# IMPORT CSV DATA
+# Adjusted theto recieved data both from  web page demo and CURL
 # e.g. curl -X POST -F "file=@data/departments.csv" -F "table_name=departments" -F "chunk_size=1000" http://127.0.0.1:8080/import
 @app.route("/import", methods=['GET', 'POST'])
 def get_import():
