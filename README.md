@@ -10,7 +10,6 @@ cd data-engineer-challenge
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-python3 app.py
 ```
 
 Rename the file dot_env_sample to .env and fill in the values
@@ -21,6 +20,12 @@ MYSQL_DATABASE=
 MYSQL_USER=
 MYSQL_PASSWORD=
 MYSQL_PORT=3306
+```
+
+Run app
+
+```
+python3 app.py
 ```
 
 The app.py initializes
@@ -39,6 +44,7 @@ Press CTRL+C to quit
 
 - The API is available at http://127.0.0.1:8080/ (adjust to your ip address)
 - All actions in the API are available via web interface
+- NOTE: Start by importing data before checking dashboard
 
 <img src="docs/api_home_web.png" alt="Home" height="200">
 <img src="docs/import_data_api.png" alt="Import" height="200">
