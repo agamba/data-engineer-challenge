@@ -7,15 +7,6 @@ from config import DATABASE_URI
 # create base class
 Base = declarative_base()
 
-# Create a database engine and session
-engine = create_engine(DATABASE_URI)
-Session = sessionmaker(bind=engine)
-# Evaluate when is better to start a new session
-# session = Session()
-
-# Initialize databas
-def initialize_db():
-    Base.metadata.create_all(engine)
 
 # Define db tables
 #####################
@@ -58,3 +49,12 @@ def delete_all_tables():
 def delete_table(table_name):
     table = Base.metadata.tables[table_name]
     table.drop(engine)
+
+# Create a database engine and session
+engine = create_engine(DATABASE_URI)
+Session = sessionmaker(bind=engine)
+session = Session()
+
+# # Initialize databas
+def initialize_db():
+    Base.metadata.create_all(engine)
