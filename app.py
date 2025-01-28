@@ -126,7 +126,6 @@ def backup_page():
 @app.route("/backups-restore", methods=['GET', 'POST'])
 def backup_restore():
     restore_file_name = request.form.get('restore_file_name')
-    print(f"restore_file_name: {restore_file_name}")
     if request.method == 'POST':
         restore_file_name = request.form.get('restore_file_name')
         print(f"restore_file_name: {restore_file_name}")
