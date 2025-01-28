@@ -4,7 +4,7 @@ import traceback
 import os
 import uuid
 import fastavro
-from sqlalchemy import insert, MetaData
+from sqlalchemy import insert, MetaData, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql.sqltypes import Integer, String, DateTime, Boolean, Float, Numeric
@@ -125,6 +125,7 @@ def restore_backup(table_name, backup_file):
         dict: A dictionary containing the action, status, and any error messages.
     """
     try:
+        # open the backup file and read the data
         with open(f"{BACKUPS_FOLDER}/{backup_file}", "rb") as f:
             avro_reader = fastavro.reader(f)
             data = list(avro_reader)  # Read all records into a list
@@ -133,7 +134,19 @@ def restore_backup(table_name, backup_file):
         metadata = MetaData()
         metadata.reflect(engine, only=[table_name])  # Use reflect
         table = metadata.tables[table_name] 
+        
+        # Check if the table exists and truncate it
+        result_tbl_chk = session.execute(text(f"SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{table_name}' LIMIT 1;"))
+        table_exists = result_tbl_chk.scalar() #scalar() for single value
+        if table_exists:
+            session.execute(text(f"TRUNCATE TABLE {table_name};"))
+            session.commit()
+            print(f"Table '{table_name}' truncated.")
+        else:
+            print(f"Table '{table_name}' does not exist.")
 
+        # TODO: Add extra check if table exists and has the same schema, truncate it
+        
         # Insert data into the table
         for record in data:
             # Convert datetime format for compatibility
@@ -145,6 +158,7 @@ def restore_backup(table_name, backup_file):
             elif 'datetime' in record and isinstance(record['datetime'], datetime):
                 pass #already a datetime - don't modify
             session.execute(table.insert().values(record))
+        print("\nEnd data insertion")
         session.commit()
         session.close()
 
