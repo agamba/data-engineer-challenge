@@ -13,9 +13,13 @@ from models import engine, Session, Department, Job, HiredEmployee, Transaction,
 
 def get_table_counts():
     query = """SELECT 
-    (SELECT COUNT(*) FROM hired_employees) AS 'Total Hired Employees',
-    (SELECT COUNT(*) FROM departments) AS 'Total Departments',
-    (SELECT COUNT(*) FROM jobs) AS 'Total Jobs';"""
+    (SELECT COUNT(id) FROM hired_employees) AS 'Total Hired Employees',
+    (SELECT COUNT(id) FROM departments) AS 'Total Departments',
+    (SELECT COUNT(id) FROM jobs) AS 'Total Jobs',
+    (SELECT COUNT(id) FROM backups_files) AS 'Total Backups',
+    (SELECT COUNT(id) FROM reports) AS 'Total Reports',
+    (SELECT COUNT(id) FROM transactions) AS 'Total Import Transactions'
+    ;"""
     result = pd.read_sql_query(query, engine)
     html = result.to_html(index=False)
     return html
