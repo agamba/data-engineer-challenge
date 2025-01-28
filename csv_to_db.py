@@ -5,7 +5,7 @@ import traceback
 import pandas as pd
 import numpy as np
 import json
-from sqlalchemy import insert
+from sqlalchemy import insert, text
 import uuid
 
 from config import LOGS_FOLDER, SHOW_CONSOLE_LOGS_IMPORT, columns_names_by_table
@@ -40,6 +40,12 @@ def get_import_logs(number_of_logs=100):
     # convert df to html table
     html = result.to_html(index=False, escape=False) # convert df to html table
     return html
+
+def force_truncate_table(table_name):
+    query = f"TRUNCATE TABLE {table_name};"
+    with engine.connect() as connection:
+        connection.execute(text(query))
+    return f"Table {table_name} truncated successfully"
 
 def load_csv_data(file_name, chunk_size, table_name):
     columns_names = columns_names_by_table[table_name]

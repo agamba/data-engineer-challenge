@@ -6,7 +6,7 @@ import mimetypes
 
 from config import RESULT_FOLDER, UPLOAD_FOLDER
 from models import initialize_db
-from csv_to_db import process_valid_invalid_results, get_table_counts, get_import_logs
+from csv_to_db import process_valid_invalid_results, get_table_counts, get_import_logs, force_truncate_table
 from backups import create_backup, restore_backup, get_backup_files
 
 from req001 import process_requirement1
@@ -118,12 +118,20 @@ def get_import():
         # render the import page
         return render_template('import.html', import_logs_html=import_logs_html, number_of_logs=number_of_logs)
 
+@app.route("/force-truncate-table", methods=['GET', 'POST'])
+def force_truncate():
+    if request.method == 'POST':
+        table_name  = request.form.get('table_name')
+        result = force_truncate_table(table_name)
+        return result
+
 # BACKUPS
 @app.route("/backups")
 def backup_page():
     # load and dispaly existing backups
     backups = get_backup_files()
-    return render_template('backups.html' , backups=backups)
+    table_counts = get_table_counts()
+    return render_template('backups.html' , backups=backups, table_counts=table_counts)
 
 @app.route("/backups-restore", methods=['GET', 'POST'])
 def backup_restore():
