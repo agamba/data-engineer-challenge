@@ -24,5 +24,8 @@
 
       <input type="submit" value="Import" />
     </form>
+    <h1>History of Import Transactions</h1>
+    <p>Last {{ number_of_logs }} transactions</p>
+    {{ import_logs_html | safe }}
   </body>
 </html>

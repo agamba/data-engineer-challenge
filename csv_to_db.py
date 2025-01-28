@@ -24,6 +24,23 @@ def get_table_counts():
     html = result.to_html(index=False)
     return html
 
+def get_import_logs(number_of_logs=100):
+    query = f"SELECT * FROM transactions ORDER BY datetime DESC LIMIT {number_of_logs};"
+    result = pd.read_sql_query(query, engine)
+    #remove  RESULTS/ from the path 
+    result['json_log_file'] = result['json_log_file'].str.replace(r'RESULTS/', '', regex=True)
+    # create colum with formatted date YYYY-MM-DD HH:MM:SS
+    result['formatted_date'] = result['datetime'].dt.strftime('%Y-%m-%d %H:%M:%S')
+    # create colum with html link to the log file
+    result["log_url"] = result["json_log_file"].apply(lambda x: f"<a href='/serve/{x}' target='logs'>{x}</a>")
+    # remove unnecesary columns
+    result = result.drop(columns=['id', 'datetime', 'json_log_file'])
+    # rename columns
+    result = result.rename(columns={'table_name': 'Table Name', 'formatted_date': 'Date Time', 'log_url': 'Log File'})
+    # convert df to html table
+    html = result.to_html(index=False, escape=False) # convert df to html table
+    return html
+
 def load_csv_data(file_name, chunk_size, table_name):
     columns_names = columns_names_by_table[table_name]
     # optional, Specify columns data types: e.g. dtype={'id': 'int64', }

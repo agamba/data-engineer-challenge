@@ -6,7 +6,7 @@ import mimetypes
 
 from config import RESULT_FOLDER, UPLOAD_FOLDER
 from models import initialize_db
-from csv_to_db import process_valid_invalid_results, get_table_counts
+from csv_to_db import process_valid_invalid_results, get_table_counts, get_import_logs
 from backups import create_backup, restore_backup, get_backup_files
 
 from req001 import process_requirement1
@@ -112,9 +112,11 @@ def get_import():
         return f"\n\nData processed successfully, check logs for details: \n{logs_file_path}.\n\n", 201
         # return jsonify(response), 201
     else:
+        # get import transactions logs (last 100)
+        number_of_logs=100
+        import_logs_html = get_import_logs(number_of_logs=number_of_logs)
         # render the import page
-        return render_template('import.html')
-
+        return render_template('import.html', import_logs_html=import_logs_html, number_of_logs=number_of_logs)
 
 # BACKUPS
 @app.route("/backups")
@@ -192,7 +194,6 @@ def serve_file(filename):
     content_type = mimetypes.guess_type(filepath)[0]
     if content_type is None:
       content_type = "application/octet-stream"  # Default content type if unknown
-
 
     try:
         return send_from_directory(RESULT_FOLDER, filename, mimetype=content_type)
