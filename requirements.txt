@@ -6,6 +6,7 @@ Flask
 SQLAlchemy
 pymysql
 python-dotenv
+dotenv
 matplotlib
 pandas
 seaborn
