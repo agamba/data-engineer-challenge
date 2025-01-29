@@ -25,21 +25,25 @@ def get_table_counts():
     return html
 
 def get_import_logs(number_of_logs=100):
-    query = f"SELECT * FROM transactions ORDER BY datetime DESC LIMIT {number_of_logs};"
-    result = pd.read_sql_query(query, engine)
-    #remove  RESULTS/ from the path 
-    result['json_log_file'] = result['json_log_file'].str.replace(r'RESULTS/', '', regex=True)
-    # create colum with formatted date YYYY-MM-DD HH:MM:SS
-    result['formatted_date'] = result['datetime'].dt.strftime('%Y-%m-%d %H:%M:%S')
-    # create colum with html link to the log file
-    result["log_url"] = result["json_log_file"].apply(lambda x: f"<a href='/serve/{x}' target='logs'>{x}</a>")
-    # remove unnecesary columns
-    result = result.drop(columns=['id', 'datetime', 'json_log_file'])
-    # rename columns
-    result = result.rename(columns={'table_name': 'Table Name', 'formatted_date': 'Date Time', 'log_url': 'Log File'})
-    # convert df to html table
-    html = result.to_html(index=False, escape=False) # convert df to html table
-    return html
+    try:
+        query = f"SELECT * FROM transactions ORDER BY datetime DESC LIMIT {number_of_logs};"
+        result = pd.read_sql_query(query, engine)
+        #remove  RESULTS/ from the path
+        result['json_log_file'] = result['json_log_file'].str.replace(r'RESULTS/', '', regex=True)
+        # create colum with formatted date YYYY-MM-DD HH:MM:SS
+        result['formatted_date'] = result['datetime'].dt.strftime('%Y-%m-%d %H:%M:%S')
+        # create colum with html link to the log file
+        result["log_url"] = result["json_log_file"].apply(lambda x: f"<a href='/serve/{x}' target='logs'>{x}</a>")
+        # remove unnecesary columns
+        result = result.drop(columns=['id', 'datetime', 'json_log_file'])
+        # rename columns
+        result = result.rename(columns={'table_name': 'Table Name', 'formatted_date': 'Date Time', 'log_url': 'Log File'})
+        # convert df to html table
+        html = result.to_html(index=False, escape=False) # convert df to html table
+        return html
+    except Exception as e:
+        return "<p>No records found</p>"
+
 
 def force_truncate_table(table_name):
     query = f"TRUNCATE TABLE {table_name};"
