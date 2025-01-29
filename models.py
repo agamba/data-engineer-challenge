@@ -1,6 +1,6 @@
 # models.py
 import os
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text, text, exc
+from sqlalchemy import create_engine, MetaData, Column, Integer, String, DateTime, Text, text, exc
 from sqlalchemy.orm import sessionmaker, declarative_base
 from config import DATABASE_URI
 
@@ -63,7 +63,8 @@ def delete_table(table_name):
 # Create a database engine and session
 engine = create_engine(DATABASE_URI)
 Session = sessionmaker(bind=engine)
-session = Session()
+metadata = MetaData()
+# session = Session()
 
 # # Initialize databas
 def initialize_db():
