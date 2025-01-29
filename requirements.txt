@@ -8,3 +8,6 @@ pymysql
 python-dotenv
 matplotlib
 pandas
+seaborn
+uuid
+numpy
