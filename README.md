@@ -130,11 +130,3 @@ docker run -p 8080:8080 data-engineer-challenge
 <img src="docs/sample___req_01_hires_dep_job_quarter_heatmap.png" alt="Heatmap Plot" height="200">
 <img src="docs/sample___req_01_hires_dep_quarter_barchar.png" alt="Barchart Plot" height="200">
 <img src="docs/sample___req_02_hires_dep_top.png" alt="Top Hires plot" height="200">
-
-## Deploy in Google Cloud Platform
-
-### In google clound, enable the following APIs in your <project_id>
-
-- Cloud Run API
-- Artifact Registry API
-- Cloud Build API
