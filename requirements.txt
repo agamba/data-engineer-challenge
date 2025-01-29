@@ -6,3 +6,5 @@ Flask
 SQLAlchemy
 pymysql
 python-dotenv
+matplotlib
+pandas
