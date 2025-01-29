@@ -120,7 +120,7 @@ docker run -p 8080:8080 data-engineer-challenge
 \
 [X] Log transactions in json file in logs folder
 \
-[] Add brach for gcp deploy
+[] Add git branch for gcp deploy
 
 ## Sample Data Results
 
