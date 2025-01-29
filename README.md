@@ -119,6 +119,8 @@ docker run -p 8080:8080 data-engineer-challenge
 [X] Implement logging transactions (success/failure) in DB
 \
 [X] Log transactions in json file in logs folder
+\
+[] Add brach for gcp deploy
 
 ## Sample Data Results
 
