@@ -5,3 +5,4 @@ pytest
 Flask
 SQLAlchemy
 pymysql
+python-dotenv
