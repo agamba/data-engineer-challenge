@@ -15,7 +15,12 @@ from req002 import process_requirement2
 app = Flask(__name__, template_folder='templates')
 
 # Initialize the database
-initialize_db()
+valid_connection, error_msg = initialize_db()
+# if not valid_connection:
+    # abort(500, description="Database connection failed")
+    # exit()
+
+    
 
 # TODO: securuty considerations/options (not implemented yet)
 # use simple API key 
@@ -25,7 +30,7 @@ initialize_db()
 # HOME
 @app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template('index.html', error_msg=error_msg)
 
 
 # DASHBOARD

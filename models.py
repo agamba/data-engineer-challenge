@@ -67,4 +67,9 @@ session = Session()
 
 # # Initialize databas
 def initialize_db():
-    Base.metadata.create_all(engine)
+    try:
+        Base.metadata.create_all(engine)
+        return True, ""
+    except Exception as e:
+        print(f"\nError Initializing database: {e}\n")
+        return False, str(e)
