@@ -48,53 +48,57 @@ def hires_quarter(df, departments_df, jobs_df, year=2021):
                       sorted ascending by department_id and job_id.  All four quarters
                       are included as columns.
     """ 
-    # Add quarter column to df
-    df['quarter'] = df['datetime'].dt.quarter
+    try:
+            # Add quarter column to df
+        df['quarter'] = df['datetime'].dt.quarter
 
-    # Create filter and filter data for year
-    filt = (df['datetime'].dt.year == year)
-    df_filtered_by_year = df[filt]
+        # Create filter and filter data for year
+        filt = (df['datetime'].dt.year == year)
+        df_filtered_by_year = df[filt]
 
-    # Group by (on filter slice) department, job, and quarter and count unique employee IDs:
-    hires_group_dep_job_quarter  = df_filtered_by_year.groupby(['department_id', 'job_id', 'quarter'])['employee_id'].nunique().reset_index()
+        # Group by (on filter slice) department, job, and quarter and count unique employee IDs:
+        hires_group_dep_job_quarter  = df_filtered_by_year.groupby(['department_id', 'job_id', 'quarter'])['employee_id'].nunique().reset_index()
 
-    # Pivot the table to have quarters as columns:
-    hires_df = hires_group_dep_job_quarter.pivot_table(index=['department_id', 'job_id'], columns='quarter', values='employee_id', fill_value=0).reset_index()
+        # Pivot the table to have quarters as columns:
+        hires_df = hires_group_dep_job_quarter.pivot_table(index=['department_id', 'job_id'], columns='quarter', values='employee_id', fill_value=0).reset_index()
 
-    ################ fixed
-    # Ensure all four quarters are present:
-    for quarter in range(1, 5):  # Check for quarters 1 through 4
-        if quarter not in hires_df.columns:
-            hires_df[quarter] = 0  # Add missing quarter and fill with 0
+        ################ fixed
+        # Ensure all four quarters are present:
+        for quarter in range(1, 5):  # Check for quarters 1 through 4
+            if quarter not in hires_df.columns:
+                hires_df[quarter] = 0  # Add missing quarter and fill with 0
 
-    # Reorder columns to ensure Q1, Q2, Q3, Q4 order (if needed):
-    quarter_cols = [col for col in hires_df.columns if isinstance(col, (int, np.integer)) and 1 <= col <=4]
-    other_cols = [col for col in hires_df.columns if col not in quarter_cols]
-    hires_df = hires_df[other_cols + sorted(quarter_cols)]
-    ################
+        # Reorder columns to ensure Q1, Q2, Q3, Q4 order (if needed):
+        quarter_cols = [col for col in hires_df.columns if isinstance(col, (int, np.integer)) and 1 <= col <=4]
+        other_cols = [col for col in hires_df.columns if col not in quarter_cols]
+        hires_df = hires_df[other_cols + sorted(quarter_cols)]
+        ################
 
-    # TODO: doube check required order
-    hires_df = hires_df.sort_values(['department_id', 'job_id'])
+        # TODO: doube check required order
+        hires_df = hires_df.sort_values(['department_id', 'job_id'])
 
-    # Adjust data frame to requirement 
-    
-    # rename quarter columns to string values
-    hires_df.rename(columns={1: 'Q1', 2: 'Q2', 3: 'Q3', 4: 'Q4'}, inplace=True)
+        # Adjust data frame to requirement
 
-    # join with departments and jobs to get the names
-    hires_df_dept_jobs = hires_df.merge(departments_df, on='department_id', how='left').merge(jobs_df, on='job_id', how='left') 
+        # rename quarter columns to string values
+        hires_df.rename(columns={1: 'Q1', 2: 'Q2', 3: 'Q3', 4: 'Q4'}, inplace=True)
 
-    # Set a new column order 
-    new_order = ['department', 'job', 'department_id', 'job_id', 'Q1', 'Q2', 'Q3', 'Q4']
+        # join with departments and jobs to get the names
+        hires_df_dept_jobs = hires_df.merge(departments_df, on='department_id', how='left').merge(jobs_df, on='job_id', how='left')
 
-    # Reorder the DataFrame
-    hires_df_dept_jobs = hires_df_dept_jobs[new_order]
+        # Set a new column order
+        new_order = ['department', 'job', 'department_id', 'job_id', 'Q1', 'Q2', 'Q3', 'Q4']
 
-    # drop department_id and job_id columns
-    hires_df_dept_jobs.drop(['department_id', 'job_id'], axis=1, inplace=True)
+        # Reorder the DataFrame
+        hires_df_dept_jobs = hires_df_dept_jobs[new_order]
 
-    return hires_df_dept_jobs
+        # drop department_id and job_id columns
+        hires_df_dept_jobs.drop(['department_id', 'job_id'], axis=1, inplace=True)
 
+        return hires_df_dept_jobs
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
 
 def generate_visualizations(df, uuid_sess):
     """ 
@@ -166,52 +170,45 @@ def process_requirement1(year=2021):
 
     # loading data
     df, departments_df, jobs_df = load_data()
-    # print(df.head())
-    # print(departments_df.head())
-    # print(jobs_df.head())
-    # print()
-    # print("#" * 20)
+
+    # check if data is loaded
+    if df is None or departments_df is None or jobs_df is None:
+        return None
 
     # test hires_quarter
     hires_df_dept_jobs = hires_quarter(df, departments_df, jobs_df, year)
-    print(hires_df_dept_jobs.head())
-    
-
-    if hires_df_dept_jobs is not None:
-        # generate plot images
-        images = generate_visualizations(hires_df_dept_jobs, uuid_sess)
-        
-        # save results to csv
-        report_csv_file = f'{uuid_sess}___req_01_hires_dep_job_quarter.csv'
-        hires_df_dept_jobs.to_csv(f"{RESULT_FOLDER}/{report_csv_file}", index=False)
-
-        # save also an html version of the dataframe for the report
-        result_html = hires_df_dept_jobs.to_html(index=False, classes='table table-striped table-bordered table-hover')
-        report_html_file = f'{uuid_sess}___req_01_hires_dep_job_quarter.html'
-        with open(f"{RESULT_FOLDER}/{report_html_file}", 'w') as f:
-            f.write(result_html)
-
-        result_dic = {
-            "report_name": "req_01_hires_dep_job_quarter",
-            "session_id": uuid_sess,
-            "datetime": datetime.now(),
-            "html": report_html_file,
-            "csv": report_csv_file,
-            "images": ",".join(images) # return images as s string separated by commas
-        }
-
-        # log created results to database
-        stmt = insert(Report).values(**result_dic)
-
-        # Execute the insert statement within a unique session
-        with Session() as session:
-            session.execute(stmt)
-            session.commit()
-            session.close()
-
-        return result_dic
-    else:
+    if hires_df_dept_jobs is None:
         return None
 
-# results = process_requirement(year=2021)
-# print(results)
+    # generate plot images
+    images = generate_visualizations(hires_df_dept_jobs, uuid_sess)
+
+    # save results to csv
+    report_csv_file = f'{uuid_sess}___req_01_hires_dep_job_quarter.csv'
+    hires_df_dept_jobs.to_csv(f"{RESULT_FOLDER}/{report_csv_file}", index=False)
+
+    # save also an html version of the dataframe for the report
+    result_html = hires_df_dept_jobs.to_html(index=False, classes='table table-striped table-bordered table-hover')
+    report_html_file = f'{uuid_sess}___req_01_hires_dep_job_quarter.html'
+    with open(f"{RESULT_FOLDER}/{report_html_file}", 'w') as f:
+        f.write(result_html)
+
+    result_dic = {
+        "report_name": "req_01_hires_dep_job_quarter",
+        "session_id": uuid_sess,
+        "datetime": datetime.now(),
+        "html": report_html_file,
+        "csv": report_csv_file,
+        "images": ",".join(images) # return images as s string separated by commas
+    }
+
+    # log created results to database
+    stmt = insert(Report).values(**result_dic)
+
+    # Execute the insert statement within a unique session
+    with Session() as session:
+        session.execute(stmt)
+        session.commit()
+        session.close()
+
+    return result_dic
