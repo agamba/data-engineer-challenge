@@ -28,6 +28,20 @@ def get_import_logs(number_of_logs=100):
     try:
         query = f"SELECT * FROM transactions ORDER BY datetime DESC LIMIT {number_of_logs};"
         result = pd.read_sql_query(query, engine)
+        if(result.empty):
+            return "<p>No records found</p>"
+
+        # # Approach using SQLAlchemy ORM: in general not recommended for large datasets
+        # with Session() as session:
+        #     query = text(f"SELECT * FROM transactions ORDER BY datetime DESC LIMIT {number_of_logs};")
+        #     result_sql = session.execute(query)
+        # # check if result_sql is empty
+        # if result_sql.rowcount == 0:
+        #     return "<p>No records found</p>"
+        # # convert to pandas df
+        # result = pd.DataFrame(result_sql.fetchall(), columns=result_sql.keys())
+
+
         #remove  RESULTS/ from the path
         result['json_log_file'] = result['json_log_file'].str.replace(r'RESULTS/', '', regex=True)
         # create colum with formatted date YYYY-MM-DD HH:MM:SS
@@ -42,8 +56,10 @@ def get_import_logs(number_of_logs=100):
         html = result.to_html(index=False, escape=False) # convert df to html table
         return html
     except Exception as e:
-        return "<p>No records found</p>"
-
+        error_message = f"\nValidating batch. error: {e}"
+        error_message += f"\nTraceback:\n{traceback.format_exc()}"
+        print(error_message)
+        return error_message
 
 def force_truncate_table(table_name):
     query = f"TRUNCATE TABLE {table_name};"
