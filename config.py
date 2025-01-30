@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 
 # Set to false if using local MySQL
-USE_CLOUD_SQL = False
+USE_CLOUD_SQL = True
 
 if USE_CLOUD_SQL and os.environ.get("INSTANCE_CONNECTION_NAME"):
     # Pass env vars to the container (see Dockerfile)
