@@ -8,8 +8,15 @@ import json
 from sqlalchemy import insert, text
 import uuid
 
-from config import LOGS_FOLDER, SHOW_CONSOLE_LOGS_IMPORT, columns_names_by_table
+from config import LOGS_FOLDER, SHOW_CONSOLE_LOGS_IMPORT
 from models import engine, Session, Department, Job, HiredEmployee, Transaction, exc
+
+# TODO: Make this dynamic from DB models
+columns_names_by_table = {
+    "departments": ['id', 'department'],
+    "jobs": ['id', 'job'],
+    "hired_employees": ['id', 'name', 'datetime', 'department_id', 'job_id']
+}
 
 def get_table_counts():
     query = """SELECT 
