@@ -1,21 +1,23 @@
 # config.py
 import os
 from dotenv import load_dotenv
-# Load environment variables from .env file
-load_dotenv()
 
+# Set to false if using local MySQL
+USE_CLOUD_SQL = False
+
+if USE_CLOUD_SQL and os.environ.get("INSTANCE_CONNECTION_NAME"):
+    # Pass env vars to the container (see Dockerfile)
+    print("CONNECTING TO MYSQL USING SOCKET IN GCP")
+else:
+    # Load environment variables from .env file for local development
+    load_dotenv()
+    print("CONNECTING TO MYSQL USING IP")
+
+# CONTROL LOGS IN TERMINAL
 SHOW_CONSOLE_LOGS_IMPORT = True
 SHOW_CONSOLE_LOGS_API = True
 SHOW_CONSOLE_LOGS_REPORTS = True
 
-# TODO: Make this dynamic from DB models
-columns_names_by_table = {
-    "departments": ['id', 'department'],
-    "jobs": ['id', 'job'],
-    "hired_employees": ['id', 'name', 'datetime', 'department_id', 'job_id']
-}
-
-# Assuming env variables for both local and cloud environments
 instance_connection_name = os.environ.get("INSTANCE_CONNECTION_NAME")
 db_host = os.environ.get("DB_HOST")
 db_name = os.environ.get("DB_NAME")
@@ -31,13 +33,11 @@ db_config = {
 }
 
 # Check if running on Google Cloud SQL o local MySQL 
-if os.environ.get("INSTANCE_CONNECTION_NAME"):
-    print("CONNECTING TO MYSQL USING SOCKET")
+if USE_CLOUD_SQL and os.environ.get("INSTANCE_CONNECTION_NAME"):
     db_socket_dir = os.environ.get("DB_SOCKET_DIR", "/cloudsql")
     cloud_sql_unix_socket = os.path.join(db_socket_dir, instance_connection_name)
     DATABASE_URI = f"mysql+pymysql://{db_user}:{db_password}@/{db_name}?unix_socket={cloud_sql_unix_socket}"
 else:
-    print("CONNECTING TO MYSQL USING IP")
     DATABASE_URI = f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 
 """define directories"""
