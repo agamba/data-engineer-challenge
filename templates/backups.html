@@ -10,7 +10,8 @@
       <li><a href="/backups">Backups</a></li>
       <li><a href="/dashboard">Dashboard</a></li>
     </ul>
-    <h1>Backups</h1>
+
+    <h1>Backups <button onclick="location.reload();">Refresh</button></h1>
 
     <h2>Create a new backup:</h2>
     <form action="/backups-create" method="post">
@@ -23,9 +24,9 @@
       </select>
       <button type="submit">Create Backup</button>
     </form>
-    <h2>Restore a backups:</h2>
+    <h2>Restore existing backup:</h2>
     <form action="/backups-restore" method="post">
-      <select id="restore_file_name" name="restore_file_name" required>
+      <select multiple id="restore_file_name" name="restore_file_name" required>
         <option value="">-- Select a backup file</option>
         {% for backup in backups %}
         <option value="{{ backup.avro_file | default('') }}">
@@ -36,7 +37,7 @@
       </select>
       <button type="submit">Restore Backup</button>
     </form>
-    <h1>Force TRUNCATE table:</h1>
+    <h2>Force TRUNCATE table:</h2>
     <p>Used only for testing purposes</p>
     <form action="/force-truncate-table" method="post">
       <select id="table_name" name="table_name" required>
@@ -47,7 +48,7 @@
       </select>
       <button type="submit">Truncate Table</button>
     </form>
-    <h1>Table Counts</h1>
+    <h2>Table Counts</h2>
     {{ table_counts | safe }}
   </body>
 </html>
