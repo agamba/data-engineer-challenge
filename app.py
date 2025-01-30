@@ -16,11 +16,11 @@ app = Flask(__name__, template_folder='templates')
 
 # Initialize the database
 valid_connection, error_msg = initialize_db()
-# if not valid_connection:
-    # abort(500, description="Database connection failed")
-    # exit()
-
-    
+if not valid_connection:
+    print("Database connection failed")
+    exit()
+else:
+    print("Database connection Successful")
 
 # TODO: securuty considerations/options (not implemented yet)
 # use simple API key 
@@ -40,6 +40,8 @@ def dashboard():
 
     results1 = process_requirement1(year=2021)
     results2 = process_requirement2(year=2021)
+    if results1 is None or results2 is None:
+        return("No data available to generate reports")
     
     # TODO: Further consideration needed for rendering result data in the template
 

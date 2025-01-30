@@ -1,4 +1,3 @@
-pyspark
 fastavro
 pandas
 pytest
@@ -11,3 +10,4 @@ pandas
 seaborn
 uuid
 numpy
+gunicorn

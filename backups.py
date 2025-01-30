@@ -1,5 +1,5 @@
 # backup.py
-""" Functmions for create and restore backups in AVRO format """
+""" Functions to create and restore backups in AVRO format """
 import traceback
 import os
 import uuid
@@ -12,10 +12,10 @@ from datetime import datetime, timezone
 
 from config import BACKUPS_FOLDER
 # re use sqlAlchemy engine from models.py
-from models import engine, Job, Department, HiredEmployee, BackupFile
+from models import engine, Session, metadata, Job, Department, HiredEmployee, BackupFile
 
-Session = sessionmaker(bind=engine)
-metadata = MetaData()
+# Session = sessionmaker(bind=engine)
+# metadata = MetaData()
 
 
 # table names to model class mappings
@@ -131,7 +131,7 @@ def restore_backup(table_name, backup_file):
             data = list(avro_reader)  # Read all records into a list
 
         session = Session()
-        metadata = MetaData()
+        # metadata = MetaData()
         metadata.reflect(engine, only=[table_name])  # Use reflect
         table = metadata.tables[table_name] 
         
