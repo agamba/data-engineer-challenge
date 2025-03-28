@@ -15,11 +15,11 @@ pip install -r requirements.txt
 Rename the file dot_env_sample to .env and fill in the values
 
 ```
-MYSQL_HOST=
-MYSQL_DATABASE=
-MYSQL_USER=
-MYSQL_PASSWORD=
-MYSQL_PORT=3306
+DB_HOST=
+DB_NAME=
+DB_USER=
+DB_PASS=
+DB_PORT=
 ```
 
 Run app
@@ -36,8 +36,10 @@ The app.py initializes
  * Running on http://192.168.0.4:8080
 Press CTRL+C to quit
  * Restarting with stat
+CONNECTING TO MYSQL USING IP
+Database connection Successful
  * Debugger is active!
- * Debugger PIN: 315-947-788
+ * Debugger PIN: 131-913-079
 ```
 
 ## Web Interface
@@ -119,6 +121,8 @@ docker run -p 8080:8080 data-engineer-challenge
 [X] Implement logging transactions (success/failure) in DB
 \
 [X] Log transactions in json file in logs folder
+\
+[] Add git branch for gcp deploy
 
 ## Sample Data Results
 
@@ -130,3 +134,38 @@ docker run -p 8080:8080 data-engineer-challenge
 <img src="docs/sample___req_01_hires_dep_job_quarter_heatmap.png" alt="Heatmap Plot" height="200">
 <img src="docs/sample___req_01_hires_dep_quarter_barchar.png" alt="Barchart Plot" height="200">
 <img src="docs/sample___req_02_hires_dep_top.png" alt="Top Hires plot" height="200">
+
+## Google Cloud Deploy
+
+1. Remove any credentials from .evn file (not used in cloud deploy)
+
+2. build image to Artifact Registry
+
+- create an Artifact Registry
+- run build command from project root
+
+```
+gcloud builds submit --tag us-central1-docker.pkg.dev/[PROJECT_ID]/[REPOSITORY_NAME]]/[DOCKER_IMAGE_NAME]:[OPTIONAL_TAG_NAME]
+```
+
+3. Deploy Container
+   Pre-requisites
+
+- create db
+- set activate proxy sql
+- enable private network access
+- other priviledges as needed
+
+4. Deploy image into Container (Service Instance in Cloud Run)
+
+- go to Cloud Run
+- Create Service
+- select docker image
+- set Variables and Secretes
+
+```
+INSTANCE_CONNECTION_NAME
+DB_NAME
+DB_USER
+DB_PASS
+```
